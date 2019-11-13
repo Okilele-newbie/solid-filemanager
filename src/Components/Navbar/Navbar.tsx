@@ -90,7 +90,7 @@ function SearchAppBar(props: SearchAppBarProps) {
                 handleClickPath={index => moveUpwards(path.length - index - 1)} 
                 handleGoBack={() => moveUpwards(1)}
                 canGoBack={canGoBack}
-                rootTitle="Solid Filemanager"
+                rootTitle="Root"
             />
           </Typography>
           <div className={classes.grow} />

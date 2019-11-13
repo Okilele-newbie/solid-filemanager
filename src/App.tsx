@@ -5,7 +5,7 @@ import ContextMenu from './Components/ContextMenu/ContextMenu';
 import Dialogs from './Components/Dialogs/Dialogs';
 
 import { MuiThemeProvider as MaterialUI, createMuiTheme, WithStyles } from '@material-ui/core/styles';
-import blue from '@material-ui/core/colors/blue';
+//import blue from '@material-ui/core/colors/blue';
 import { connect } from 'react-redux';
 import { initApp, MyDispatch, closeContextMenu } from './Actions/Actions';
 import DynamicSnackbar from './Components/Notification/DynamicSnackbar';
@@ -13,7 +13,7 @@ import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
 
 const theme = createMuiTheme({
     palette: {
-        primary: blue,
+        //primary: blue,
     },
     typography: {
         useNextVariants: true,

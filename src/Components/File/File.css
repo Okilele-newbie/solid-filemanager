@@ -2,8 +2,14 @@
     cursor: pointer;
     float: left;
     display: block;
-    width: 100%;
+    width: 99%;
     user-select: none;
+}
+
+.FileList .filename > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .File:hover {

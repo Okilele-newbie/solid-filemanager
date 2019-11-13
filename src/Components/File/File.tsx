@@ -7,32 +7,45 @@ import {
 import './File.css';
 
 import ListItem from '@material-ui/core/ListItem';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import ListItemText from '@material-ui/core/ListItemText';
-import Avatar from '@material-ui/core/Avatar';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import Divider from "@material-ui/core/Divider";
 import FolderIcon from '@material-ui/icons/Folder';
+import { styled  } from '@material-ui/styles';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
 import blue from '@material-ui/core/colors/blue';
 import { FileItem, Item } from '../../Api/Item';
 import { AppState } from '../../Reducers/reducer';
 
+const MyListItem = styled(ListItem)({
+     padding: '0 16px 0px 16px',
+  });
+
+const MyListItemText = styled(ListItemText)({
+    fontSize: '4.5rem',
+});
+
+  
 class File extends Component<FileProps> {
+
     render() {
+        //const classes = useStyles();
         const { isSelected, item, handleClick, handleDoubleClick, handleContextMenu } = this.props;
-        const avatarStyle = {
+        const iconStyle = {
             backgroundColor: isSelected ? blue['A200'] : undefined
         };
         const realSize = (item instanceof FileItem) ? item.getDisplaySize() : null;
         return (
             <div className="File" onClick={handleClick} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} data-selected={isSelected}>
-                <ListItem>
-                    <ListItemAvatar>
-                        <Avatar style={avatarStyle}>
+                <MyListItem>
+                    <ListItemIcon>
+                        <div style={iconStyle}>
                             { (item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
-                        </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText className="filename" primary={item.getDisplayName()} secondary={realSize} />
-                </ListItem>
+                        </div>
+                    </ListItemIcon>
+                    <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize} />
+                    <Divider absolute />
+                </MyListItem>
             </div>
         );
     }
