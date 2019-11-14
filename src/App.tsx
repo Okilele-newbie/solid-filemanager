@@ -11,6 +11,8 @@ import { initApp, MyDispatch, closeContextMenu } from './Actions/Actions';
 import DynamicSnackbar from './Components/Notification/DynamicSnackbar';
 import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
 
+const TreeView = require('./Components/TreeView/TreeView.js');
+
 const theme = createMuiTheme({
     palette: {
         //primary: blue,
