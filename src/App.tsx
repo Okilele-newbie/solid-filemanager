@@ -10,8 +10,9 @@ import { connect } from 'react-redux';
 import { initApp, MyDispatch, closeContextMenu } from './Actions/Actions';
 import DynamicSnackbar from './Components/Notification/DynamicSnackbar';
 import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
+import TreeView from './Components/TreeView/TreeView';
 
-const TreeView = require('./Components/TreeView/TreeView.js');
+import './App.css';
 
 const theme = createMuiTheme({
     palette: {
@@ -34,7 +35,10 @@ class App extends Component<AppProps> {
                 <MaterialUI theme={theme}>
                     <div onClick={this.props.handleHideContextMenu} onContextMenu={this.props.handleHideContextMenu}>
                         <Navbar />
-                        <FileList />
+                        <div className = 'bodyPlace'>
+                            <TreeView />
+                            <FileList />
+                        </div>
                         <ContextMenu />
                         <DynamicSnackbar />
                         <Dialogs />
@@ -51,7 +55,7 @@ interface DispatchProps {
     handleHideContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
 
-interface AppProps extends DispatchProps {}
+interface AppProps extends DispatchProps { }
 
 const mapStateToProps = () => ({});
 
