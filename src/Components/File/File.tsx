@@ -11,26 +11,26 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from "@material-ui/core/Divider";
 import FolderIcon from '@material-ui/icons/Folder';
-import { styled } from '@material-ui/styles';
+import { styled  } from '@material-ui/styles';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
 import blue from '@material-ui/core/colors/blue';
 import { FileItem, Item } from '../../Api/Item';
 import { AppState } from '../../Reducers/reducer';
 
 const MyListItem = styled(ListItem)({
-    padding: '0 16px 0px 16px',
-});
+     padding: '0 16px 0px 16px',
+  });
 
 const MyListItemText = styled(ListItemText)({
     fontSize: '4.5rem',
 });
 
-
+  
 class File extends Component<FileProps> {
 
     render() {
         //const classes = useStyles();
-        const { isSelected, item, handleClick, handleClickOnFolder, handleDoubleClick, handleContextMenu } = this.props;
+        const { isSelected, item, handleClick, handleDoubleClick, handleContextMenu } = this.props;
         const iconStyle = {
             backgroundColor: isSelected ? blue['A200'] : undefined
         };
@@ -39,8 +39,8 @@ class File extends Component<FileProps> {
             <div className="File" onClick={handleClick} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} data-selected={isSelected}>
                 <MyListItem>
                     <ListItemIcon>
-                        <div style={iconStyle} onClick={handleClickOnFolder}>
-                            {(item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
+                        <div style={iconStyle}>
+                            { (item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
                         </div>
                     </ListItemIcon>
                     <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize} />
@@ -60,11 +60,10 @@ interface StateProps {
 }
 interface DispatchProps {
     handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
-    handleClickOnFolder(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
     handleDoubleClick(): void;
     handleContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
-interface FileProps extends FileOwnProps, StateProps, DispatchProps { }
+interface FileProps extends FileOwnProps, StateProps, DispatchProps {}
 
 
 const mapStateToProps = (state: AppState, ownProps: FileOwnProps): StateProps => {
@@ -115,7 +114,7 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
             } else {
                 dispatch(rightClickOnFile(ownProps.item));
             }
-
+            
             dispatch(openContextMenu({ x, y }));
         },
 
@@ -129,10 +128,6 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
             } else {
                 dispatch(selectItems([ownProps.item]));
             }
-        },
-        handleClickOnFolder: (event: React.MouseEvent<HTMLDivElement, MouseEvent> | React.TouchEvent) => {
-            const item = ownProps.item;
-            dispatch(enterFolderByItem(item));
         }
     };
 };
