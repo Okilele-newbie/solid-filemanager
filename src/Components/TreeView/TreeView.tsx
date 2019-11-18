@@ -17,20 +17,7 @@ import { Item } from '../../Api/Item';
 
 import Utils from "./Utils";
 //const Utils = require('./Utils.ts');
-
-const webId: string = 'https://okilele.solid.community/'
-
-const MyListItem = styled(ListItem)({
-    padding: '0 16px 0px 16px',
-});
-
-const MyListItemText = styled(ListItemText)({
-    fontSize: '0.9em',
-});
-
-interface IState {
-    [index: string]: boolean;
-}
+import TreeViewItem from "./TreeViewItem";
 
 interface IFolder {
     type: "folder";
@@ -44,6 +31,12 @@ interface IFolder {
     files: Array<any>; // an array of files in the folder
     folders: IFolder[];// an array of sub-folders in the folder,
     alreadyReadSubFolders?: boolean;//details of sub folders are read
+}
+
+const webId: string = 'https://okilele.solid.community/'
+
+interface IState {
+    [index: string]: boolean;
 }
 
 async function initFolders(thisObject: TreeView) {
@@ -64,24 +57,11 @@ async function updateFolder(thisObject: TreeView, e: IFolder) {
     thisObject.forceUpdate()
 };
 
-class TreeView extends Component<FileProps> {
+export default class TreeView extends Component {
     state = {} as IState;
     folder = {} as IFolder;
 
-    //handleClick = this.props.handleClick;
-
-    handleClickFolder = (item: IFolder) => {
-        updateFolder(this, item);
-    };
-
-    throwHandleClick = (item: IFolder) => {
-        //ownProps.item = item
-        //const { handleClick } = this.props;
-        //{ handleClick }
-    }
-
     render() {
-        const { isSelected, item, handleClick } = this.props;
 
         if (this.folder.name === undefined) {
             initFolders(this)
@@ -95,8 +75,7 @@ class TreeView extends Component<FileProps> {
                         }>
                         {this.printRows(
                             this.folder.folders,
-                            -1,
-                            handleClick)}
+                            -1)}
                     </List>
                 </div>
             )
@@ -104,7 +83,11 @@ class TreeView extends Component<FileProps> {
 
     };
 
-    printRows(items: IFolder[], colNumber: number, handleClick: any) {
+    truc(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+
+    }
+
+    printRows(items: IFolder[], colNumber: number) {
         colNumber = colNumber + 1
         var blanks = ''
         for (var it = 0; it < colNumber; it++) { blanks += '. . ' }
@@ -113,30 +96,11 @@ class TreeView extends Component<FileProps> {
                 items.map((item: IFolder) => {
                     return (
                         <div key={item.name}>
-                            <MyListItem
-                                button
-                                key={item.name}
-                            >
-                                {blanks}
-                                <div
-                                    key={item.name}
-                                    onClick={this.handleClickFolder.bind(this, item)}
-                                >
-                                    {item.folders && item.folders.length !== 0 ? (
-                                        this.state[item.url]
-                                            ? (<ExpandLess key={item.name} />)
-                                            : (<ExpandMore key={item.name} />)
-                                    ) : (null)}
-                                </div>
-
-                                <MyListItemText
-                                    key={item.name + 'txt'}
-                                    onClick={handleClick}
-                                >
-                                    {item.name}
-                                </MyListItemText>
-
-                            </MyListItem>
+                            <TreeViewItem
+                                item={item}
+                                key={0}
+                                isSelected={false}
+                            />
                             {item.folders != null ? (
                                 <Collapse
                                     key={item.name + 'col'}
@@ -145,7 +109,7 @@ class TreeView extends Component<FileProps> {
                                     timeout="auto"
                                     unmountOnExit
                                 >
-                                    {this.printRows(item.folders, colNumber, handleClick)}
+                                    {this.printRows(item.folders, colNumber)}
                                 </Collapse>
                             ) : (null)}
                         </div>
@@ -158,28 +122,3 @@ class TreeView extends Component<FileProps> {
     }
 }
 
-interface FileOwnProps {
-    item: Item;
-}
-interface StateProps {
-    isSelected: boolean;
-}
-interface DispatchProps {
-    handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
-}
-interface FileProps extends FileOwnProps, StateProps, DispatchProps { }
-
-const mapStateToProps = () => ({});
-
-const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): DispatchProps => {
-    return {
-        handleClick: () => {
-            console.log(`mapDispatchToProps, ownProps=${ownProps}`)
-            //const item = ownProps.item;
-            const item = new Item('https://okilele.solid.community/private/')
-            dispatch(enterFolderByItem(item));
-        }
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(TreeView);

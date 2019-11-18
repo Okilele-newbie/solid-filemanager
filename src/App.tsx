@@ -30,10 +30,6 @@ class App extends Component<AppProps> {
         this.props.init();
     };
 
-    truc(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        return
-    }
-
     render() {
 
         return (
@@ -42,11 +38,7 @@ class App extends Component<AppProps> {
                     <div onClick={this.props.handleHideContextMenu} onContextMenu={this.props.handleHideContextMenu}>
                         <Navbar />
                         <div className='bodyPlace'>
-                            <TreeView
-                                item={new Item('https://okilele.solid.community/')}
-                                key={0}
-                                isSelected={false}
-                            />
+                            <TreeView />
                             <FileList />
                         </div>
                         <ContextMenu />
