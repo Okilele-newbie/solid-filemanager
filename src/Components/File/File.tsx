@@ -11,21 +11,21 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from "@material-ui/core/Divider";
 import FolderIcon from '@material-ui/icons/Folder';
-import { styled  } from '@material-ui/styles';
+import { styled } from '@material-ui/styles';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
 import blue from '@material-ui/core/colors/blue';
 import { FileItem, Item } from '../../Api/Item';
 import { AppState } from '../../Reducers/reducer';
 
 const MyListItem = styled(ListItem)({
-     padding: '0 16px 0px 16px',
-  });
+    padding: '0 16px 0px 16px',
+});
 
 const MyListItemText = styled(ListItemText)({
     fontSize: '4.5rem',
 });
 
-  
+
 class File extends Component<FileProps> {
 
     render() {
@@ -40,7 +40,7 @@ class File extends Component<FileProps> {
                 <MyListItem>
                     <ListItemIcon>
                         <div style={iconStyle}>
-                            { (item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
+                            {(item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
                         </div>
                     </ListItemIcon>
                     <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize} />
@@ -63,7 +63,7 @@ interface DispatchProps {
     handleDoubleClick(): void;
     handleContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
-interface FileProps extends FileOwnProps, StateProps, DispatchProps {}
+interface FileProps extends FileOwnProps, StateProps, DispatchProps { }
 
 
 const mapStateToProps = (state: AppState, ownProps: FileOwnProps): StateProps => {
@@ -74,7 +74,14 @@ const mapStateToProps = (state: AppState, ownProps: FileOwnProps): StateProps =>
 
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): DispatchProps => {
+/*
+    const temp = ownProps.item;    console.log(`name: ${temp._name}`)
+    console.log(`_name: ${temp._name}`)
+    console.log(`_url: ${temp._url}`)
+    console.log(`_path: ${temp._path}`)
+*/
     return {
+
         handleDoubleClick: () => {
             const item = ownProps.item;
 
@@ -114,12 +121,13 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
             } else {
                 dispatch(rightClickOnFile(ownProps.item));
             }
-            
+
             dispatch(openContextMenu({ x, y }));
         },
 
         handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent> | React.TouchEvent) => {
             event.stopPropagation();
+            console.log(`File..mapDispatchToProps.handleClick for ${ownProps.item._name} `)
 
             if (event.ctrlKey) {
                 dispatch(toggleSelectedItem(ownProps.item));

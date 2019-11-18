@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import TreeView from './Components/TreeView/TreeView';
 import FileList from './Components/FileList/FileList';
 import Navbar from './Components/Navbar/Navbar';
 import ContextMenu from './Components/ContextMenu/ContextMenu';
 import Dialogs from './Components/Dialogs/Dialogs';
+import { Item } from './Api/Item';
 
 import { MuiThemeProvider as MaterialUI, createMuiTheme, WithStyles } from '@material-ui/core/styles';
 //import blue from '@material-ui/core/colors/blue';
@@ -11,7 +13,7 @@ import { initApp, MyDispatch, closeContextMenu } from './Actions/Actions';
 import DynamicSnackbar from './Components/Notification/DynamicSnackbar';
 import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
 
-const TreeView = require('./Components/TreeView/TreeView.js');
+import './App.css'
 
 const theme = createMuiTheme({
     palette: {
@@ -28,13 +30,25 @@ class App extends Component<AppProps> {
         this.props.init();
     };
 
+    truc(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
+        return
+    }
+
     render() {
+
         return (
             <div className="App">
                 <MaterialUI theme={theme}>
                     <div onClick={this.props.handleHideContextMenu} onContextMenu={this.props.handleHideContextMenu}>
                         <Navbar />
-                        <FileList />
+                        <div className='bodyPlace'>
+                            <TreeView
+                                item={new Item('https://okilele.solid.community/')}
+                                key={0}
+                                isSelected={false}
+                            />
+                            <FileList />
+                        </div>
                         <ContextMenu />
                         <DynamicSnackbar />
                         <Dialogs />
@@ -51,7 +65,7 @@ interface DispatchProps {
     handleHideContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
 
-interface AppProps extends DispatchProps {}
+interface AppProps extends DispatchProps { }
 
 const mapStateToProps = () => ({});
 
