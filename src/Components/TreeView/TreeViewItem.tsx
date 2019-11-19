@@ -12,7 +12,7 @@ import { enterFolderByItem, MyDispatch } from '../../Actions/Actions';
 import { Item } from '../../Api/Item';
 
 //import { Blank } from '../../Icon/Blank';
-//import Blank from "@material-ui/icons/_Blank"
+//import Blank from "@material-ui/icons/Blank" // Works and icon
 
 //import { IFolder } from '../../Api/IFolder';
 
@@ -46,33 +46,31 @@ const MyListItemText = styled(ListItemText)({
     padding: '0 0px'
 });
 
+//                {Utils.blanks(colNumber)}
+//Utils.Blank()
 class TreeViewItem extends React.Component<TreeViewProps> {
+
     state = {} as IState;
     colNumber = 2;
 
     render() {
-        const { item, handleClick, colNumber, fn } = this.props
-
-        const blanks = [];
-        for (var it = 0; it < colNumber; it++) {
-            blanks.push(<Blank key={it} />)
-        }
+        const { item, handleClick, colNumber, itemHandleClick } = this.props
 
         return (
             <MyListItem
                 button
                 key={item.name}
-                onClick={fn.bind(this, item)}
+                onClick={itemHandleClick.bind(this, item)}
             >
+                {Utils.blanks(colNumber)}
                 <div
                     key={item.name}
                 >
-                    {blanks}
                     {item.folders && item.folders.length !== 0 ? (
-                        this.state[item.url]
+                        this.props.expColl
                             ? (<ExpandLess key={item.name} />)
                             : (<ExpandMore key={item.name} />)
-                    ) : (<Blank />)}
+                    ) : (Utils.Blank())}
                 </div>
 
                 <MyListItemText
@@ -90,7 +88,8 @@ class TreeViewItem extends React.Component<TreeViewProps> {
 interface TreeViewOwnProps {
     item: IFolder;
     colNumber: number;
-    fn(folder: IFolder): void;
+    itemHandleClick(folder: IFolder): void;
+    expColl: boolean
 }
 interface StateProps {
 }
@@ -111,22 +110,3 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TreeViewOwnProps): D
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TreeViewItem);
-
-// ----------------------- ICON -------------------------
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
-
-var _react = _interopRequireDefault(require("react"));
-
-var _createSvgIcon = _interopRequireDefault(require("@material-ui/icons/utils/createSvgIcon"));
-
-var Blank = (0, _createSvgIcon.default)(_react.default.createElement(_react.default.Fragment, null, _react.default.createElement("path", {
-  fill: "none",
-  d: "M0 0h24v24H0z"
-}), _react.default.createElement("path", {
-  d: ""
-})), 'Blank');
-
-//export (Blank);

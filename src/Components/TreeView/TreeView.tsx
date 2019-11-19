@@ -35,12 +35,12 @@ async function initFolders(thisObject: TreeView) {
     updateFolder(thisObject, rootFolder)
 }
 
-async function updateFolder(thisObject: TreeView, e: IFolder) {
+async function updateFolder(thisObject: TreeView, item: IFolder) {
     //Show subItems
-    thisObject.setState({ [e.url]: !thisObject.state[e.url] });
+    thisObject.setState({ [item.url]: !thisObject.state[item.url] });
     //sub items of the clicked e:IFolder are already in its folder.folders
     //here they are updated so that the '+' sign is visible
-    let selectedFolder: IFolder = Utils.dict[e.url];
+    let selectedFolder: IFolder = Utils.dict[item.url];
     if (!selectedFolder.alreadyReadSubFolders) {
         await Utils.updateSubFolders(selectedFolder)
         selectedFolder.alreadyReadSubFolders = true
@@ -55,15 +55,17 @@ export default class TreeView extends Component {
 
     constructor(props: any) {
         super(props)
-        this.fn = this.fn.bind(this)
+        this.itemHandleClick = this.itemHandleClick.bind(this)
     }
 
-    fn(folder: IFolder) {
+    itemHandleClick(folder: IFolder) {
+        /*
         console.log(` in parent, e=${folder}`)
         var propList = "";
         var propName:any
         for(propName in folder) {console.log(propName);}
         console.log(propList);
+        */
         updateFolder(this, folder)
     };
 
@@ -102,7 +104,8 @@ export default class TreeView extends Component {
                                 item={item}
                                 key={0}
                                 colNumber={colNumber}
-                                fn={this.fn}
+                                itemHandleClick={this.itemHandleClick}
+                                expColl={this.state[item.url]}
                             />
                             {item.folders != null ? (
                                 <Collapse

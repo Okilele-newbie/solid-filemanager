@@ -1,3 +1,5 @@
+import React, { Component } from 'react';
+
 const FileClient = require('solid-file-client');
 
 interface IFolder {
@@ -24,24 +26,24 @@ export default class Utils {
 
     //Interface method for FileClient.popupLogin
     static async FileClientPopupLogin(webId: string) {
-    FileClient.popupLogin()
-    .then(
-        (webId: string) => { console.log(`Logged in as ${webId}.`); }
-        , (err: any) => console.log('Error while loging' + err))
+        FileClient.popupLogin()
+            .then(
+                (webId: string) => { console.log(`Logged in as ${webId}.`); }
+                , (err: any) => console.log('Error while loging' + err))
     }
 
     //Interface method for FileClient.readFolder
-    static async FileClientReadFolder(url:string) {
+    static async FileClientReadFolder(url: string) {
         //console.log('Entering asyncCallFileClientReadFolder with url ' + url)
         const folder: IFolder = await FileClient.readFolder(url)
         folder.name = decodeURI(folder.name)
-        folder.folders.forEach((f: IFolder) => { 
+        folder.folders.forEach((f: IFolder) => {
             f.name = decodeURI(f.name)
             f.folders = []
         })
 
         this.dict[folder.url] = folder;
-        
+
         return folder
     }
 
@@ -57,36 +59,31 @@ export default class Utils {
                 //Error on some of my folders, set an empty [] for interface validation
                 //console.log ('Got an error while reading ' + folder.folders[i].url)
                 //folder.folders[i] = <IFolder>{};
-             }
+            } finally {
+                // Error already caught at deeper level
+              }
         }
     }
-    /*
-    async function updateFolder(thisObject: TreeView, e: IFolder) {
-        //Show subItems
-        thisObject.setState({ [e.url]: !thisObject.state[e.url] });
-        //sub items of the clicked e:IFolder are already in its folder.folders
-        //here they are updated so that the '+' sign is visible
-        let selectedFolder: IFolder = Utils.dict[e.url];
-        if (!selectedFolder.alreadyReadSubFolders) {
-        await Utils.updateSubFolders(selectedFolder)
-        selectedFolder.alreadyReadSubFolders = true
-        //Show again with arrows
-        thisObject.forceUpdate()
+
+    static Blank = () =>
+        <svg
+            width="24px"
+            height="24px"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+        >
+            <path d="" fill="#fff" />
+        </svg>;
+
+
+    static blanks(colNumber: number) {
+        const blanks = [];
+        for (var it = 0; it < colNumber; it++) {
+            blanks.push(
+                this.Blank()
+            )
         }
-    };
-    async function updateFolderItem(thisObject: TreeViewItem, e: IFolder) {
-        //Show subItems
-        thisObject.setState({ [e.url]: !thisObject.state[e.url] });
-        //sub items of the clicked e:IFolder are already in its folder.folders
-        //here they are updated so that the '+' sign is visible
-            let selectedFolder: IFolder = Utils.dict[e.url];
-        if (!selectedFolder.alreadyReadSubFolders) {
-            console.log(`selected folder : ${selectedFolder.name}`)
-            await Utils.updateSubFolders(selectedFolder)
-            selectedFolder.alreadyReadSubFolders = true
-            //Show again with arrows
-            thisObject.forceUpdate()
-        }
-    };
-    */
+        return blanks
+    }
 }
