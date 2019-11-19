@@ -30,20 +30,21 @@ class File extends Component<FileProps> {
 
     render() {
         //const classes = useStyles();
-        const { isSelected, item, handleClick, handleDoubleClick, handleContextMenu } = this.props;
+        const { isSelected, item, handleClickOnName, handleClickOnFolder, handleDoubleClick, handleContextMenu } = this.props;
         const iconStyle = {
             backgroundColor: isSelected ? blue['A200'] : undefined
         };
         const realSize = (item instanceof FileItem) ? item.getDisplaySize() : null;
         return (
-            <div className="File" onClick={handleClick} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} data-selected={isSelected}>
+            <div className="File" data-selected={isSelected}>
                 <MyListItem>
                     <ListItemIcon>
-                        <div style={iconStyle}>
+                        <div style={iconStyle} onClick={handleClickOnFolder} >
                             {(item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
                         </div>
                     </ListItemIcon>
-                    <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize} />
+                    <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize}
+                        onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} />
                     <Divider absolute />
                 </MyListItem>
             </div>
@@ -59,7 +60,8 @@ interface StateProps {
     isSelected: boolean;
 }
 interface DispatchProps {
-    handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
+    handleClickOnName(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
+    handleClickOnFolder(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
     handleDoubleClick(): void;
     handleContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
@@ -74,12 +76,6 @@ const mapStateToProps = (state: AppState, ownProps: FileOwnProps): StateProps =>
 
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): DispatchProps => {
-/*
-    const temp = ownProps.item;    console.log(`name: ${temp._name}`)
-    console.log(`_name: ${temp._name}`)
-    console.log(`_url: ${temp._url}`)
-    console.log(`_path: ${temp._path}`)
-*/
     return {
 
         handleDoubleClick: () => {
@@ -125,9 +121,8 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
             dispatch(openContextMenu({ x, y }));
         },
 
-        handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent> | React.TouchEvent) => {
+        handleClickOnName: (event: React.MouseEvent<HTMLDivElement, MouseEvent> | React.TouchEvent) => {
             event.stopPropagation();
-            console.log(`File..mapDispatchToProps.handleClick for ${ownProps.item._name} `)
 
             if (event.ctrlKey) {
                 dispatch(toggleSelectedItem(ownProps.item));
@@ -136,7 +131,11 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
             } else {
                 dispatch(selectItems([ownProps.item]));
             }
-        }
+        },
+        handleClickOnFolder: () => {
+            const item = ownProps.item;
+                dispatch(enterFolderByItem(item));
+        },
     };
 };
 

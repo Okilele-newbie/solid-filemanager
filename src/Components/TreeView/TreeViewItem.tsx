@@ -5,13 +5,14 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText"
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import Blank from "@material-ui/icons/_Blank"
 import { styled } from '@material-ui/styles';
 
 import { enterFolderByItem, MyDispatch } from '../../Actions/Actions';
 
 import { Item } from '../../Api/Item';
+
 //import { Blank } from '../../Icon/Blank';
+//import Blank from "@material-ui/icons/_Blank"
 
 //import { IFolder } from '../../Api/IFolder';
 
@@ -41,7 +42,8 @@ const MyListItem = styled(ListItem)({
 });
 
 const MyListItemText = styled(ListItemText)({
-    fontSize: '0.9em',
+    fontSize: '0.8em',
+    padding: '0 0px'
 });
 
 class TreeViewItem extends React.Component<TreeViewProps> {
@@ -70,7 +72,7 @@ class TreeViewItem extends React.Component<TreeViewProps> {
                         this.state[item.url]
                             ? (<ExpandLess key={item.name} />)
                             : (<ExpandMore key={item.name} />)
-                    ) : (null)}
+                    ) : (<Blank />)}
                 </div>
 
                 <MyListItemText
@@ -109,3 +111,22 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TreeViewOwnProps): D
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(TreeViewItem);
+
+// ----------------------- ICON -------------------------
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
+var _react = _interopRequireDefault(require("react"));
+
+var _createSvgIcon = _interopRequireDefault(require("@material-ui/icons/utils/createSvgIcon"));
+
+var Blank = (0, _createSvgIcon.default)(_react.default.createElement(_react.default.Fragment, null, _react.default.createElement("path", {
+  fill: "none",
+  d: "M0 0h24v24H0z"
+}), _react.default.createElement("path", {
+  d: ""
+})), 'Blank');
+
+//export (Blank);

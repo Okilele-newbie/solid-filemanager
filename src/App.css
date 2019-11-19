@@ -1,1 +1,5 @@
-.bodyPlace{display:flex; flex-direction:row;}
+.bodyPlace{
+    display:flex; 
+    flex-direction:row;
+    flex-basis: auto
+}
