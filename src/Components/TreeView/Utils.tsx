@@ -22,7 +22,7 @@ export default class Utils {
 
     static dict = {} as IDict
 
-    //Interface for FileClient.popupLogin
+    //Interface method for FileClient.popupLogin
     static async FileClientPopupLogin(webId: string) {
     FileClient.popupLogin()
     .then(
@@ -30,6 +30,7 @@ export default class Utils {
         , (err: any) => console.log('Error while loging' + err))
     }
 
+    //Interface method for FileClient.readFolder
     static async FileClientReadFolder(url:string) {
         //console.log('Entering asyncCallFileClientReadFolder with url ' + url)
         const folder: IFolder = await FileClient.readFolder(url)
@@ -44,12 +45,12 @@ export default class Utils {
         return folder
     }
 
-    //Load folders in the folders attribute of IFolder
+    //Read details of subfoldeers of a folder
     static async updateSubFolders(folder: IFolder) {
-        //console.log('SOLID - Try to read sub items of ' + folder.url)
+        console.log('SOLID - Try to read sub items of ' + folder.url)
         for (var i = 0; i < folder.folders.length; i++) {
             try {
-                //console.log('      - Try to read items of ' + folder.folders[i].url)
+                console.log(`      - Try to read items of ${folder.folders[i].url}`)
                 var subsFolder = await Utils.FileClientReadFolder(folder.folders[i].url)
                 folder.folders[i] = subsFolder;
             } catch (err) {
@@ -59,4 +60,33 @@ export default class Utils {
              }
         }
     }
+    /*
+    async function updateFolder(thisObject: TreeView, e: IFolder) {
+        //Show subItems
+        thisObject.setState({ [e.url]: !thisObject.state[e.url] });
+        //sub items of the clicked e:IFolder are already in its folder.folders
+        //here they are updated so that the '+' sign is visible
+        let selectedFolder: IFolder = Utils.dict[e.url];
+        if (!selectedFolder.alreadyReadSubFolders) {
+        await Utils.updateSubFolders(selectedFolder)
+        selectedFolder.alreadyReadSubFolders = true
+        //Show again with arrows
+        thisObject.forceUpdate()
+        }
+    };
+    async function updateFolderItem(thisObject: TreeViewItem, e: IFolder) {
+        //Show subItems
+        thisObject.setState({ [e.url]: !thisObject.state[e.url] });
+        //sub items of the clicked e:IFolder are already in its folder.folders
+        //here they are updated so that the '+' sign is visible
+            let selectedFolder: IFolder = Utils.dict[e.url];
+        if (!selectedFolder.alreadyReadSubFolders) {
+            console.log(`selected folder : ${selectedFolder.name}`)
+            await Utils.updateSubFolders(selectedFolder)
+            selectedFolder.alreadyReadSubFolders = true
+            //Show again with arrows
+            thisObject.forceUpdate()
+        }
+    };
+    */
 }

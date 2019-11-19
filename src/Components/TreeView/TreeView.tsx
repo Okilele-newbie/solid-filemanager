@@ -3,17 +3,7 @@ import { connect } from 'react-redux';
 
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText"
-import ExpandLess from "@material-ui/icons/ExpandLess";
-import ExpandMore from "@material-ui/icons/ExpandMore";
 import Collapse from "@material-ui/core/Collapse";
-
-import { styled } from '@material-ui/styles';
-
-import { enterFolderByItem, MyDispatch } from '../../Actions/Actions';
-import { AppState } from '../../Reducers/reducer';
-import { Item } from '../../Api/Item';
 
 import Utils from "./Utils";
 //const Utils = require('./Utils.ts');
@@ -51,15 +41,31 @@ async function updateFolder(thisObject: TreeView, e: IFolder) {
     //sub items of the clicked e:IFolder are already in its folder.folders
     //here they are updated so that the '+' sign is visible
     let selectedFolder: IFolder = Utils.dict[e.url];
-    await Utils.updateSubFolders(selectedFolder)
-    selectedFolder.alreadyReadSubFolders = true
-    //Show again with arrows
-    thisObject.forceUpdate()
+    if (!selectedFolder.alreadyReadSubFolders) {
+        await Utils.updateSubFolders(selectedFolder)
+        selectedFolder.alreadyReadSubFolders = true
+        //Show again with arrows
+        thisObject.forceUpdate()
+    }
 };
 
 export default class TreeView extends Component {
     state = {} as IState;
     folder = {} as IFolder;
+
+    constructor(props: any) {
+        super(props)
+        this.fn = this.fn.bind(this)
+    }
+
+    fn(folder: IFolder) {
+        console.log(` in parent, e=${folder}`)
+        var propList = "";
+        var propName:any
+        for(propName in folder) {console.log(propName);}
+        console.log(propList);
+        updateFolder(this, folder)
+    };
 
     render() {
 
@@ -83,10 +89,6 @@ export default class TreeView extends Component {
 
     };
 
-    truc(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-
-    }
-
     printRows(items: IFolder[], colNumber: number) {
         colNumber = colNumber + 1
         var blanks = ''
@@ -99,7 +101,8 @@ export default class TreeView extends Component {
                             <TreeViewItem
                                 item={item}
                                 key={0}
-                                isSelected={false}
+                                colNumber={colNumber}
+                                fn={this.fn}
                             />
                             {item.folders != null ? (
                                 <Collapse
