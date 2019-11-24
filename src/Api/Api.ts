@@ -47,6 +47,15 @@ export async function moveItems(path: string, destination: string, itemNames: st
     return removeItems(path, itemNames);
 };
 
+/**
+ * Fetch API to tag a file
+ */
+export async function editTags(path: string, oldName: string, newName: string): Promise<Response> {
+    //await copyFile(path, oldName, path, newName);
+    //return removeItem(path, oldName);
+    console.log('in Api.edittags')
+};
+
 
 /**
  * Fetch API to rename a file

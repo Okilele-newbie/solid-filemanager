@@ -145,7 +145,6 @@ export const refreshItemList = (): MyThunk => (dispatch, getState) => {
     return dispatch(displayCurrentItemList());
 };
 
-
 /**
  * Request API to rename file then dispatch defined events
  */
@@ -163,7 +162,7 @@ export const renameFile = (fileName: string, newFileName: string): MyThunk => (d
 };
 
 /**
- * Request API to rename file then dispatch defined events
+ * Request API to rename folder then dispatch defined events
  */
 export const renameFolder = (folderName: string, newFolderName: string): MyThunk => (dispatch, getState) => {
     const { path } = getState();
@@ -296,6 +295,15 @@ export const loadAndEditFile = (fileName: string): MyThunk => (dispatch, getStat
 export const loadAndDisplayFile = (fileName: string): MyThunk => (dispatch, getState) => {
     dispatch(getFileContent(fileName));
     dispatch(openDialog(DIALOGS.CONTENT));
+};
+
+/**
+ * Request API to get file tags  and display them
+ */
+export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getState) => {
+        console.log('in Actions.loadAndEditTags')
+    dispatch(getFileContent(fileName));
+    dispatch(openDialog(DIALOGS.EDITTAGS));
 };
 
 

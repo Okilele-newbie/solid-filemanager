@@ -7,11 +7,13 @@ import RemoveAction from './ContextMenuActions/RemoveAction';
 import MoveAction from './ContextMenuActions/MoveAction';
 import CopyAction from './ContextMenuActions/CopyAction';
 import EditAction from './ContextMenuActions/EditAction';
+import EditTagsAction from './ContextMenuActions/EditTagsAction';
 import RenameAction from './ContextMenuActions/RenameAction';
 import ZipAction from './ContextMenuActions/ZipAction';
 import ExtractAction from './ContextMenuActions/ExtractAction';
 import DownloadAction from './ContextMenuActions/DownloadAction';
 import OpenInNewTabAction from './ContextMenuActions/OpenInNewTabAction';
+import UploadFileAction from './ContextMenuActions/UploadFileAction';
 import { Item, FileItem, FolderItem } from '../../Api/Item';
 import { AppState } from '../../Reducers/reducer';
 
@@ -35,9 +37,11 @@ class ContextMenu extends Component<ContextMenuProps> {
                     {acts.includes('open') && <OpenAction />}
                     {acts.includes('openInNewTab') && <OpenInNewTabAction />}
                     {acts.includes('download') && <DownloadAction />}
+                    {acts.includes('upload') && <UploadFileAction />}
                     {acts.includes('compress') && <ZipAction />}
                     {acts.includes('extract') && <ExtractAction />}
                     {acts.includes('edit') && <EditAction />}
+                    {acts.includes('editTags') && <EditTagsAction />}
                     {acts.includes('copy') && <CopyAction />}
                     {acts.includes('move') && <MoveAction />}
                     {acts.includes('rename') && <RenameAction />}
@@ -95,6 +99,7 @@ const getActionsForItem = (item: Item) => {
         'rename',
         'remove',
         'download',
+        'editTags'
     ];
     return [
         ...commonActions,
@@ -110,6 +115,7 @@ const getActionsForItem = (item: Item) => {
 const getActionsForFile = (file: FileItem) => {
     const actions = [];
     file.isEditable() && actions.push('edit');
+    file.isEditable() && actions.push('editTags');
     file.isExtractable() && actions.push('extract');
     (file.isImage() || file.isMedia()) && actions.push('open');
 
@@ -122,7 +128,8 @@ const getActionsForFile = (file: FileItem) => {
 const getActionsForFolder = (folder: FolderItem) => {
     return [
         'open',
-        'compress'
+        'compress',
+        'upload'
     ];
 };
 

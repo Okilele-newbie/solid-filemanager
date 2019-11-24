@@ -87,6 +87,16 @@ export const getFileBlob = (path: string, filename: string): Promise<Blob> => {
         .catch(handleFetchError);
 };
 
+/**
+ * Wrap API response for taging a file
+ */
+export const editTags = (path: string, fileName: string, newFileName: string): Promise<Response> => {
+    console.log('in ApiHandler.editTags')
+    path = fixPath(path);
+    cache.remove(path);
+    return API.editTags(path, fileName, newFileName)
+        .catch(handleFetchError)
+};
 
 /**
  * Wrap API response for renaming a file

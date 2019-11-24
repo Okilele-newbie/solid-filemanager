@@ -23,7 +23,7 @@ interface IFolder {
     alreadyReadSubFolders?: boolean;//details of sub folders are read
 }
 
-const webId: string = 'https://okilele.solid.community/'
+const webId: string = 'https://okilele.inrupt.net/'
 
 interface IState {
     [index: string]: boolean;

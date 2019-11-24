@@ -47,6 +47,7 @@ export enum DIALOGS {
     CREATE_FILE = 'CREATE_FILE',
     UPLOAD_FILE = 'UPLOAD_FILE',
     RENAME = 'RENAME',
+    EDITTAGS = 'EDITTAGS',
     MOVE = 'MOVE',
     COPY = 'COPY',
     CONTENT = 'CONTENT',

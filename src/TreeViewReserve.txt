@@ -18,7 +18,7 @@ import { Item } from '../../Api/Item';
 import Utils from "./Utils";
 //const Utils = require('./Utils.ts');
 
-const webId: string = 'https://okilele.solid.community/'
+const webId: string = 'https://okilele.inrupt.net/'
 
 const MyListItem = styled(ListItem)({
     padding: '0 16px 0px 16px',
@@ -178,7 +178,7 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: FileOwnProps): Dispa
         handleClick: () => {
             console.log(`mapDispatchToProps, ownProps=${ownProps}`)
             //const item = ownProps.item;
-            const item = new Item('https://okilele.solid.community/private/')
+            const item = new Item('https://okilele.inrupt.net/private/')
             dispatch(enterFolderByItem(item));
         }
     };
