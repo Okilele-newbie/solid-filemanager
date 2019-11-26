@@ -62,7 +62,7 @@ class TreeViewItem extends React.Component<TreeViewProps> {
                 key={item.name}
                 onClick={itemHandleClick.bind(this, item)}
             >
-                {Utils.blanks(colNumber)}
+                {this.blanks(colNumber)}
                 <div
                     key={item.name}
                 >
@@ -70,7 +70,7 @@ class TreeViewItem extends React.Component<TreeViewProps> {
                         this.props.expColl
                             ? (<ExpandLess key={item.name} />)
                             : (<ExpandMore key={item.name} />)
-                    ) : (Utils.Blank())}
+                    ) : (this.Blank())}
                 </div>
 
                 <MyListItemText
@@ -82,6 +82,28 @@ class TreeViewItem extends React.Component<TreeViewProps> {
 
             </MyListItem>
         )
+    }
+
+    Blank = () =>
+        <svg
+            width="24px"
+            height="24px"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlnsXlink="http://www.w3.org/1999/xlink"
+        >
+            <path d="" fill="#fff" />
+        </svg>;
+
+
+    blanks(colNumber: number) {
+        const blanks = [];
+        for (var it = 0; it < colNumber; it++) {
+            blanks.push(
+                this.Blank()
+            )
+        }
+        return blanks
     }
 }
 

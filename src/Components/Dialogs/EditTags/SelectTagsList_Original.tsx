@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: { palette: { background: { paper: any; }; }
 
 export default function CheckboxList() {
   const classes = useStyles();
-  const [checked, setChecked] = React.useState([0]);
+  const [checked, setChecked] = React.useState([]);
 
   const handleToggle = (value:number) => () => {
     const currentIndex = checked.indexOf(value);

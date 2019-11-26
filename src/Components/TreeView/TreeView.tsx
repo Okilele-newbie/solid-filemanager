@@ -1,57 +1,29 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import Collapse from "@material-ui/core/Collapse";
 
-import Utils from "./Utils";
-//const Utils = require('./Utils.ts');
+import SolidFileClientUtils, { IFolder } from '../../Api/SolidFileClientUtils';
 import TreeViewItem from "./TreeViewItem";
 
-interface IFolder {
-    type: "folder";
-    name: string; // folder name (without path),
-    url: string; // full URL of the resource,
-    modified: string; // dcterms:modified date
-    mtime: string; // stat:mtime
-    size: number;// stat:size
-    parent: string;// parentFolder or undef if none,
-    content: string; // raw content of the folder's turtle representation,
-    files: Array<any>; // an array of files in the folder
-    folders: IFolder[];// an array of sub-folders in the folder,
-    alreadyReadSubFolders?: boolean;//details of sub folders are read
+/*
+interface IDict {
+    [index: string]: IFolder;
 }
-
-const webId: string = 'https://okilele.inrupt.net/'
+*/
 
 interface IState {
     [index: string]: boolean;
 }
 
-async function initFolders(thisObject: TreeView) {
-    const rootFolder: IFolder = await Utils.FileClientReadFolder(webId)
-    thisObject.folder = rootFolder
-    updateFolder(thisObject, rootFolder)
-}
 
-async function updateFolder(thisObject: TreeView, item: IFolder) {
-    //Show subItems
-    thisObject.setState({ [item.url]: !thisObject.state[item.url] });
-    //sub items of the clicked e:IFolder are already in its folder.folders
-    //here they are updated so that the '+' sign is visible
-    let selectedFolder: IFolder = Utils.dict[item.url];
-    if (!selectedFolder.alreadyReadSubFolders) {
-        await Utils.updateSubFolders(selectedFolder)
-        selectedFolder.alreadyReadSubFolders = true
-        //Show again with arrows
-        thisObject.forceUpdate()
-    }
-};
 
 export default class TreeView extends Component {
     state = {} as IState;
     folder = {} as IFolder;
+
+    //dict = {} as IDict
 
     constructor(props: any) {
         super(props)
@@ -59,20 +31,14 @@ export default class TreeView extends Component {
     }
 
     itemHandleClick(folder: IFolder) {
-        /*
-        console.log(` in parent, e=${folder}`)
-        var propList = "";
-        var propName:any
-        for(propName in folder) {console.log(propName);}
-        console.log(propList);
-        */
-        updateFolder(this, folder)
+        this.updateFolder(folder)
+        this.setState({ [folder.url]: !this.state[folder.url] });
     };
 
     render() {
 
         if (this.folder.name === undefined) {
-            initFolders(this)
+            this.initFolders()
             return (<div></div>)
         } else {
             return (
@@ -93,8 +59,6 @@ export default class TreeView extends Component {
 
     printRows(items: IFolder[], colNumber: number) {
         colNumber = colNumber + 1
-        var blanks = ''
-        for (var it = 0; it < colNumber; it++) { blanks += '. . ' }
         if (items != null) {
             return (
                 items.map((item: IFolder) => {
@@ -126,5 +90,57 @@ export default class TreeView extends Component {
         }
         colNumber = colNumber - 1
     }
+
+    async initFolders() {
+
+        console.log('1')
+        //await SolidFileClientUtils.FileClientPopupLogin()
+        this.folder = await SolidFileClientUtils.FileClientReadFolder(
+            SolidFileClientUtils.getServerId()
+        )
+        //get folders in the root
+        await this.updateFolder(this.folder)
+
+        //and then update those folders so that the arrows (if any) are visible
+        for (var i = 0; i < this.folder.folders.length; i++) {
+            await this.updateFolder(this.folder.folders[i])
+        }
+        this.forceUpdate()
+    }
+
+    //also called on folder icon click
+    async updateFolder(item: IFolder) {
+        console.log('2.1' + item.folders.length)
+        //sub items of the clicked e:IFolder are already in its folder.folders
+        //here for each of those sub items are updated so that the arrow sign on the parent is visible
+        if (!item.full) {
+            for (var i = 0; i < item.folders.length; i++) {
+                //console.log(`      - Try to read items of ${item.folders[i].url}`)
+                item.folders[i] = await SolidFileClientUtils.FileClientReadFolder(item.folders[i].url)
+            }
+            item.full = true
+            //console.log('Set subfolder.full for ' + item.url)
+        }
+        //this.setState({ [item.url]: !this.state[item.url] });
+    };
+
+    //Read details of subfolders of a folder
+    async updateSubFolders(folder: IFolder) {
+        for (var i = 0; i < folder.folders.length; i++) {
+            try {
+                //console.log(`      - Try to read items of ${folder.folders[i].url}`)
+                var subFolder = await SolidFileClientUtils.FileClientReadFolder(folder.folders[i].url)
+                //console.log(`       added subFolder ${subFolder.url}`)
+                folder.folders[i] = subFolder;
+            } catch (err) {
+                //Error on some damaged folders, set an empty [] for interface validation
+                //console.log ('Got an error while reading ' + folder.folders[i].url)
+                //folder.folders[i] = <IFolder>{};
+            } finally {
+                // Error already caught at deeper level
+            }
+        }
+    }
+
 }
 

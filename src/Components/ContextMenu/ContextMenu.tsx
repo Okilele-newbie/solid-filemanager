@@ -98,8 +98,7 @@ const getActionsForItem = (item: Item) => {
         'move',
         'rename',
         'remove',
-        'download',
-        'editTags'
+        'download'
     ];
     return [
         ...commonActions,
@@ -115,7 +114,7 @@ const getActionsForItem = (item: Item) => {
 const getActionsForFile = (file: FileItem) => {
     const actions = [];
     file.isEditable() && actions.push('edit');
-    file.isEditable() && actions.push('editTags');
+    actions.push('editTags');
     file.isExtractable() && actions.push('extract');
     (file.isImage() || file.isMedia()) && actions.push('open');
 

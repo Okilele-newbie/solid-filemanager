@@ -28,6 +28,10 @@ export class Item {
             && this.path.every((val, index) => val === item.path[index]);
     }
 
+    getUrl() {
+        return this.url;
+    }
+    
     getDisplayName() {
         return decodeURI(this.name);
     }
