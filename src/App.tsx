@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
-import TreeView from './Components/TreeView/TreeView';
+import TreeAndTagViews from './TreeAndTagViews';
 import FileList from './Components/FileList/FileList';
 import Navbar from './Components/Navbar/Navbar';
 import ContextMenu from './Components/ContextMenu/ContextMenu';
 import Dialogs from './Components/Dialogs/Dialogs';
-import { Item } from './Api/Item';
 
 import { MuiThemeProvider as MaterialUI, createMuiTheme, WithStyles } from '@material-ui/core/styles';
 //import blue from '@material-ui/core/colors/blue';
@@ -38,7 +37,7 @@ class App extends Component<AppProps> {
                     <div onClick={this.props.handleHideContextMenu} onContextMenu={this.props.handleHideContextMenu}>
                         <Navbar />
                         <div className='bodyPlace'>
-                            <TreeView />
+                            <TreeAndTagViews />
                             <FileList />
                         </div>
                         <ContextMenu />

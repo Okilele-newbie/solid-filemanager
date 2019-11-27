@@ -3,3 +3,9 @@
     flex-direction:row;
     flex-basis: auto
 }
+
+.treeAndTagViews{
+    display:flex; 
+    flex-direction:row;
+    flex-basis: auto
+}

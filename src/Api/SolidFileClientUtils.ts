@@ -47,8 +47,9 @@ export default class SolidFileClientUtils {
             //console.log(`FileClientReadFolder read ${fileName} and return ${content.url}`)
             //return content
             res = content
-        }, (err: any) => { throw new Error("copy download error  " + err) });
-        console.log(`FileClientReadFolder returning ${res}`)
+        }, (err: any) => { 
+            console.log(`Not able to read folder ${fileName}`)
+            throw new Error("copy download error  " + err) });
         return res
     }
     /* works!
@@ -58,6 +59,7 @@ export default class SolidFileClientUtils {
             let body: string = FileClient.readFile(url)
         }
     */
+
     //Interface method for FileClient.readFile
     static async FileClientReadFileAsString(url: string) {
         //console.log('Entering read file with url ' + url)

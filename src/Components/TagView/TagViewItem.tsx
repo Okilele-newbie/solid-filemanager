@@ -8,7 +8,7 @@ import ExpandMore from "@material-ui/icons/ExpandMore";
 import { styled } from '@material-ui/styles';
 
 import { enterFolderByItem, MyDispatch } from '../../Actions/Actions';
-
+import { Tag, Meta } from '../../../Api/TagUtils';
 import { Item } from '../../Api/Item';
 
 interface IFolder {
@@ -40,15 +40,14 @@ const MyListItemText = styled(ListItemText)({
 
 //                {Utils.blanks(colNumber)}
 //Utils.Blank()
-class TreeViewItem extends React.Component<TreeViewProps> {
+class TagViewItem extends React.Component<TagViewProps> {
 
     state = {} as IState;
     colNumber = 2;
 
     render() {
-        //handleClick to show details on other view, from Redux
-        //itemHandleCkick from parent to expand/collapse
-        const { item, handleClick, colNumber, itemHandleClick } = this.props
+        //handleCLick from redux to show files
+        const { item, handleClick } = this.props
 
         return (
             <MyListItem
@@ -101,22 +100,19 @@ class TreeViewItem extends React.Component<TreeViewProps> {
     }
 }
 
-interface TreeViewOwnProps {
-    item: IFolder;
-    colNumber: number;
-    itemHandleClick(folder: IFolder): void;
-    expColl: boolean
+interface TagViewOwnProps {
+    item: Tag;
 }
 interface StateProps {
 }
 interface DispatchProps {
     handleClick(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
 }
-interface TreeViewProps extends TreeViewOwnProps, StateProps, DispatchProps { }
+interface TagViewProps extends TagViewOwnProps, StateProps, DispatchProps { }
 
 const mapStateToProps = () => ({});
 
-const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TreeViewOwnProps): DispatchProps => {
+const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TagViewOwnProps): DispatchProps => {
     return {
         handleClick: () => {
             const item = new Item(ownProps.item.url)
@@ -125,4 +121,4 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TreeViewOwnProps): D
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(TreeViewItem);
+export default connect(mapStateToProps, mapDispatchToProps)(TagViewItem);
