@@ -4,6 +4,7 @@ import { blob } from './currentBlobReducer';
 import { visibleDialogs, contextMenu } from './dialogsReducer';
 import { errorMessage } from './errorReducer';
 import { items } from './itemsReducer';
+import { metas } from './metasReducer';
 import { loading } from './loadingReducer';
 import { path } from './pathReducer';
 import { upload } from './uploadReducer';
@@ -18,6 +19,7 @@ const rootReducer = combineReducers({
     loading,
     path,
     upload,
+    metas
 });
 
 export default rootReducer;

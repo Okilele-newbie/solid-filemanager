@@ -14,7 +14,8 @@ interface IState {
 
 
 const MyList = styled(List)({
-    minWidth: 'max-content'
+    width: 'max-content',
+    flexShrink: 0
 });
 
 export default class TreeView extends Component {
@@ -26,7 +27,7 @@ export default class TreeView extends Component {
         this.itemHandleClick = this.itemHandleClick.bind(this)
     }
 
-    //sent to TreeViewItem
+    //sent to TreeViewItem for expand/collapse handled here
     itemHandleClick(folder: IFolder) {
         this.updateFolder(folder)
         this.setState({ [folder.url]: !this.state[folder.url] });
@@ -40,12 +41,8 @@ export default class TreeView extends Component {
             return (
                 <div>
                     <MyList
-                        subheader={
-                            <ListSubheader></ListSubheader>
-                        }>
-                        {this.printRows(
-                            this.folder.folders,
-                            -1)}
+                        subheader={<ListSubheader></ListSubheader>}>
+                        {this.printRows(this.folder.folders,  -1)}
                     </MyList>
                 </div>
             )
@@ -106,14 +103,13 @@ export default class TreeView extends Component {
 
     //also called on folder icon click
     async updateFolder(item: IFolder) {
-        //entering this method "item" has just its name and the list if names of subfolders
-        //Read it to get the list of its subfolders and then read all its subfolders to get the number the subfolders they nhave and be able to show the expand icon if needed.
-
-        //console.log(`updating folder ${item.url}`)
+        //level 0: "item" has just its name and the list of names of ...
+        //level 1: subfolders: Read it to get the list of its ...
+        //level 2: subfolders and read them to get the number their subfolders and be able to show them as well as the expand/collapse icon for level1.
+        //console.log(`updating folder level 0: ${item.url}`)
         if (!item.full) {
             for (var i = 0; i < item.folders.length; i++) {
-                //console.log(`      - adding subfolders ${item.folders[i].url}`)
-                //console.log(`      - adding subfolders number ${item.folders[i].folders.length}`)
+                //console.log(`      - adding subfolder to level 0: ${item.folders[i].url}`)
                 item.folders[i] = await SolidFileClientUtils.FileClientReadFolder(item.folders[i].url)
                 for (var j = 0; j < item.folders[i].folders.length; j++) {
                     try {
@@ -128,11 +124,6 @@ export default class TreeView extends Component {
             //console.log('Set subfolder.full for ' + item.url)
         }
     };
-
-    //Read details of subfolders of a folder
-    async updateSubFolders(folder: IFolder) {
-
-    }
-
+    
 }
 

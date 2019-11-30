@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { MuiThemeProvider as MaterialUI } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 import TreeView from './Components/TreeView/TreeView';
 import TagView from './Components/TagView/TagView';
+import FileList from './Components/FileList/FileList';
+import MetaList from './Components/Meta/MetaList';
 
 import './App.css'
 
@@ -25,19 +26,26 @@ export default class TreeAndTagViews extends Component<{}, State> {
     render() {
         return (
             <div className="App">
-                Switch
+                Tags
                 <Switch
                     checked={this.state.showTreeOrTag}
                     onChange={() => { this.onChange() }}
-                    value="Tree or tags"
-                    inputProps={{ 'aria-label': 'secondary checkbox' }}
+                    value="Tree"
+                    color="default"
                 />
-
-                <div className="TreeAndTagViews">
-                    {this.state.showTreeOrTag ? <TreeView /> : null}
-                    {!this.state.showTreeOrTag ? <TagView /> : null}
-                </div>
-            </div>
+                Tree
+                {this.state.showTreeOrTag ?
+                    <div className='bodyPlace'>
+                        <TreeView />
+                        <FileList />
+                    </div>
+                    :
+                    <div className='bodyPlace'>
+                        <TagView />
+                        <MetaList />
+                    </div>
+                }
+            </div >
         );
     }
 }

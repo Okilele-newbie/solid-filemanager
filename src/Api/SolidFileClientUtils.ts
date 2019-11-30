@@ -52,13 +52,7 @@ export default class SolidFileClientUtils {
             throw new Error("copy download error  " + err) });
         return res
     }
-    /* works!
-        //Interface method for FileClient.readFile
-        static async FileClientReadFileAsString(url: string) {
-            console.log('Entering read file with url ' + url)
-            let body: string = FileClient.readFile(url)
-        }
-    */
+
 
     //Interface method for FileClient.readFile
     static async FileClientReadFileAsString(url: string) {

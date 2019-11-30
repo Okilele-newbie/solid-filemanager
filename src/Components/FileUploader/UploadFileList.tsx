@@ -9,7 +9,6 @@ import { getHumanFileSize } from '../../Api/Item';
 
 function UploadFileList(props: UploadFileListProps) {
     const { files } = props;
-    files[0];
     const list = Array.from(files).map((f, i) =>
         <ListItem dense key={i}>
             <ListItemIcon>

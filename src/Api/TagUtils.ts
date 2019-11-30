@@ -1,10 +1,11 @@
-import SolidFileClientUtils, { IFolder } from './SolidFileClientUtils';
+import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
 import { Item } from '../Api/Item';
 
 export interface Tag {
     tagType: string,
     value: string,
+    displayedValue: string,
     description?: string
 }
 
@@ -12,18 +13,19 @@ export interface Tag {
 export interface MetaTag {
     tagType: string,
     value: string,
+    displayedValue?: string
 }
 
 export interface Meta {
     fileUrl: string,
+    fileCreationDate?: string
     description?: string,
     tags: MetaTag[],
-    creationDate?: string
 }
 
 
 const tagDir = '/public'
-const tagFileName = '_Meta1.json'
+const tagFileName = '_Meta2.json'
 
 export default class TagUtils {
 
@@ -67,6 +69,12 @@ export default class TagUtils {
         return allMetas as unknown as Meta[]
     }
 
+//List of selected tags
+    static async getMetaList(selectedTag: MetaTag[]): Promise<Meta[]> {
+        return await this.getAllMetas() as unknown as Meta[]
+    }
+
+    //Get the met of an item
     static async getMeta(item: Item) {
         console.log(`enter with item=${item.url}`)
         let currentMeta = {} as Meta
@@ -90,7 +98,6 @@ export default class TagUtils {
 
     static async updateMeta(meta: Meta) {
         let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
-
         // remove previous tags of the item
         allMetas = allMetas.filter(el => el.fileUrl !== meta.fileUrl);
 
@@ -108,112 +115,101 @@ export default class TagUtils {
         let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
         //get list of tags in meta
         let foundTags = [] as MetaTag[]
+        let foundTagsU = [] as MetaTag[]
         allMetas.map(meta => {
-            foundTags.push(meta.tags)
+            foundTags.push(...meta.tags)
         })
-        foundTags = lodash.sortedUniq(foundTags);
-        return foundTags
+        //foundTagsU = lodash.uniqBy(foundTags, 'value');
+        foundTagsU = lodash.uniqWith(foundTags, function (first, second) {
+            return first.tagType === second.tagType && first.value === second.value
+        });
+        foundTagsU = lodash.sortBy(foundTagsU, ['tagType', 'value']);
+        return foundTagsU as unknown as MetaTag[]
     }
 
     static getExtMimeTags() {
-    return this.mockGetExtMimeTags()
-}
+        return this.mockGetExtMimeTags()
+    }
 
     static getNamedTags() {
-    return this.mockGetNamedTags()
-}
+        return this.mockGetNamedTags()
+    }
 
     static getAppsTags() {
-    return this.mockGetAppNameTags()
-}
-
-    static mockGetUserTags() {
-    var json = {
-        list: [
-            {
-                tagType: "ext/MIME",
-                value: "multipart/mixed",
-            },
-            {
-                tagType: "NamedTag",
-                value: "http://solid.community/ontology/cooking",
-            },
-            {
-                tagType: "NamedTag",
-                value: "http://someother.org/conputing",
-            },
-            {
-                tagType: "AppName",
-                value: "http://solid.community/applist/solidfb",
-            }
-        ]
+        return this.mockGetAppNameTags()
     }
-    return json.list
-}
 
     static mockGetExtMimeTags() {
-    var json = {
-        list: [
-            {
-                tagType: "ext/MIME",
-                value: "text-plain",
-                description: "Used for text editable in notepad-like editors for instance"
-            },
-            {
-                tagType: "ext-MIME",
-                value: ".png",
-                description: "png extension"
-            },
-            {
-                tagType: "ext-MIME",
-                value: "multipart/mixed",
-                description: "Mixed content"
-            }
+        var json = {
+            list: [
+                {
+                    tagType: "ext/MIME",
+                    value: "text-plain",
+                    displayedValue: "",
+                    description: "Used for text editable in notepad-like editors for instance"
+                },
+                {
+                    tagType: "ext-MIME",
+                    value: "png",
+                    displayedValue: "",
+                    description: "png extension"
+                },
+                {
+                    tagType: "ext-MIME",
+                    value: "multipart/mixed",
+                    displayedValue: "",
+                    description: "Mixed content"
+                }
 
-        ]
+            ]
+        }
+        return json.list
     }
-    return json.list
-}
 
     static mockGetNamedTags() {
-    var json = {
-        list: [
-            {
-                tagType: "NamedTag",
-                value: "http://solid.community/ontology/cooking",
-                description: "Solid community description of cooking"
-            },
-            {
-                tagType: "NamedTag",
-                value: "http://some.org/conputing",
-                description: "Conputing as in some.org ontology"
-            },
-            {
-                tagType: "NamedTag",
-                value: "http://someother.org/conputing",
-                description: "Conputing as in someother.org ontology"
-            }
-        ]
+        var json = {
+            list: [
+                {
+                    tagType: "NamedTag",
+                    value: "http://solid.community/ontology/cooking",
+                    displayedValue: "Cooking",
+                    description: "Solid community description of cooking"
+                },
+                {
+                    tagType: "NamedTag",
+                    value: "http://some.org/conputing",
+                    displayedValue: "Computing",
+                    description: "Conputing as in some.org ontology"
+                },
+                {
+                    tagType: "NamedTag",
+                    value: "http://someother.org/conputing",
+                    displayedValue: "Computing",
+                    description: "Conputing as in someother.org ontology"
+                }
+            ]
+        }
+        return json.list
     }
-    return json.list
-}
 
     static mockGetAppNameTags() {
-    var json = {
-        list: [
-            {
-                tagType: "AppName",
-                value: "http://solid.community/applist/solidfb",
-                description: "Solid Facebook like"
-            },
-            {
-                tagType: "AppName",
-                value: "http://solid.community/applist/solidagram",
-                description: "Solid Instagram like"
-            },
-        ]
+        var json = {
+            list: [
+                {
+                    tagType: "AppName",
+                    value: "http://solid.community/applist/solidfb",
+                    displayedValue: "Solid Facebook",
+                    description: "Solid Facebook like"
+                },
+                {
+                    tagType: "AppName",
+                    value: "http://solid.community/applist/solidagram",
+                    displayedValue: "Solidagram",
+                    description: "Solid Instagram like"
+                },
+            ]
+        }
+        return json.list
     }
-    return json.list
-}
 
 }

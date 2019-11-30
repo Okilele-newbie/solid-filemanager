@@ -1,4 +1,4 @@
-import { Item } from "../Api/Item";
+//import { Item } from "../Api/Item";
 
 export interface Action<V> {
     type: string;
@@ -18,6 +18,7 @@ export const RESET_WEB_ID = 'RESET_WEB_ID';
 export const SET_WEB_ID = 'SET_WEB_ID';
 
 export const SET_ITEMS = 'SET_ITEMS';
+export const SET_METAS = 'SET_METAS';
 
 export const SELECT_ITEMS = 'SELECT_ITEMS';
 export const TOGGLE_SELECTED_ITEM = 'TOGGLE_SELECTED_ITEM';

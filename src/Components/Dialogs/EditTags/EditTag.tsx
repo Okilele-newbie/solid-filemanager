@@ -1,4 +1,4 @@
-import React, { Component, RefObject } from 'react';
+import React, { Component } from 'react';
 import { styled } from '@material-ui/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -21,7 +21,7 @@ const MyList = styled(List)({
   maxWidth: 360,
 });
 
-export default class CheckboxList extends Component<SelecTagListProps> {
+export default class SelectTagsList extends Component<SelecTagListProps> {
 
   render() {
     const { libraryTags, currentMeta, itemHandleClick } = this.props
@@ -32,7 +32,7 @@ export default class CheckboxList extends Component<SelecTagListProps> {
           //console.log(`${currentMeta.tags.filter(el => el.value === tag.value).length}`)
 
           const key = `${tag.tagType}-${tag.description}`
-          const labelId = `checkbox-list-label-${key}`;
+          //const labelId = `checkbox-list-label-${key}`;
           return (
             < ListItem
               key={`${tag.tagType}-${tag.description}`

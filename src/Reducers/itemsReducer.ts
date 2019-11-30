@@ -1,4 +1,5 @@
 import { Item } from "../Api/Item";
+
 import { Action, SET_ITEMS, SELECT_ITEMS, DESELECT_ITEM, FILTER_ITEMS, RESET_FILTER, TOGGLE_SELECTED_ITEM } from "../Actions/actionTypes";
 
 interface ItemsState {
@@ -14,7 +15,7 @@ const initialItemsState: ItemsState = {
 };
 
 export const items = (state = initialItemsState, action: Action<any>): ItemsState => {
-    switch(action.type) {
+    switch (action.type) {
         case SET_ITEMS:
             return { ...state, inCurFolder: action.value as Item[] };
         case SELECT_ITEMS:
@@ -22,7 +23,7 @@ export const items = (state = initialItemsState, action: Action<any>): ItemsStat
         case DESELECT_ITEM:
             return { ...state, selected: removeItem(state.selected, action.value as Item) };
         case TOGGLE_SELECTED_ITEM:
-            return { 
+            return {
                 ...state,
                 selected: state.selected.includes(action.value) ?
                     removeItem(state.selected, action.value as Item)

@@ -1,11 +1,11 @@
 import * as APIHandler from '../Api/ApiHandler';
 import * as solidAuth from 'solid-auth-client';
-import { createBrowserHistory, History } from 'history';
+//import { createBrowserHistory, History } from 'history';
 import { Item, FileItem, FolderItem } from '../Api/Item';
-import { Action, ENTER_FOLDER, SET_LOGGED_IN, SET_LOGGED_OUT, SET_HOST, SET_ITEMS, SET_WEB_ID, SELECT_ITEMS, TOGGLE_SELECTED_ITEM, DESELECT_ITEM, FILTER_ITEMS, RESET_FILTER, DISPLAY_LOADING, STOP_LOADING, DIALOGS, OPEN_DIALOG, CLOSE_DIALOG, SET_LOADED_BLOB, SET_UPLOAD_FILE_LIST, SET_UPLOAD_FILE_PROGRESS, SET_PATH, MOVE_FOLDER_UPWARDS, RESET_LOADED_BLOB, RESET_HOST, RESET_WEB_ID, SET_ERROR_MESSAGE, OPEN_CONTEXT_MENU, CLOSE_CONTEXT_MENU } from './actionTypes';
+import { Action, ENTER_FOLDER, SET_LOGGED_IN, SET_LOGGED_OUT, SET_HOST, SET_ITEMS, SET_METAS, SET_WEB_ID, SELECT_ITEMS, TOGGLE_SELECTED_ITEM, DESELECT_ITEM, FILTER_ITEMS, RESET_FILTER, DISPLAY_LOADING, STOP_LOADING, DIALOGS, OPEN_DIALOG, CLOSE_DIALOG, SET_LOADED_BLOB, SET_UPLOAD_FILE_LIST, SET_UPLOAD_FILE_PROGRESS, SET_PATH, MOVE_FOLDER_UPWARDS, RESET_LOADED_BLOB, RESET_HOST, RESET_WEB_ID, SET_ERROR_MESSAGE, OPEN_CONTEXT_MENU, CLOSE_CONTEXT_MENU } from './actionTypes';
 import { AppState } from '../Reducers/reducer';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { Meta } from '../Api/TagUtils';
+import { Meta, MetaTag } from '../Api/TagUtils';
 
 export type MyThunk = ThunkAction<void, AppState, null, Action<any>>;
 export type MyDispatch = ThunkDispatch<AppState, null, Action<any>>;
@@ -25,7 +25,7 @@ export const solidLogin = (): MyThunk => (dispatch, getState) => {
         .finally(() => dispatch(stopLoading()));
 };
 
-export const updateLoginStatus = (session?: Session|null): MyThunk => async (dispatch, getState) => {
+export const updateLoginStatus = (session?: Session | null): MyThunk => async (dispatch, getState) => {
     session = session || await solidAuth.currentSession();
     if (!session) {
         dispatch(setLoggedOut());
@@ -111,7 +111,7 @@ export const createFile = (fileName: string): MyThunk => (dispatch, getState) =>
 };
 
 
-export const updateTextFile = (fileName: string, content: Blob|string): MyThunk => (dispatch, getState) => {
+export const updateTextFile = (fileName: string, content: Blob | string): MyThunk => (dispatch, getState) => {
     const { path } = getState();
     dispatch(displayLoading());
 
@@ -124,24 +124,31 @@ export const updateTextFile = (fileName: string, content: Blob|string): MyThunk 
         .finally(() => dispatch(stopLoading()));
 }
 
-export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
-/*
-    const { path } = getState();
-    dispatch(displayLoading());
+/**
+ * Request API to get file tags  and display them
+ */
+export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getState) => {
+    console.log(`in Actions.loadAndEditTags with used (?)fileName ${fileName}`)
+    dispatch(getFileContent(fileName));
+    dispatch(openDialog(DIALOGS.EDITTAGS));
+};
 
-    APIHandler.updateMeta(meta)
-        .then(r => {
-            dispatch(closeDialog(DIALOGS.EDITTAGS));
-            //Display files list with new description and tags ? dispatch(displayCurrentItemList());
-        })
-        .catch(r => dispatch(setErrorMessage(String(r))))
-        .finally(() => dispatch(stopLoading()));
-*/
+export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
     APIHandler.updateMeta(meta)
     dispatch(closeDialog(DIALOGS.EDITTAGS));
 
 }
 
+/**
+ * Request API to display Meta list for the selected tag
+ */
+export const getMetaList = (selectedTags: MetaTag[]): MyThunk => (dispatch, getState) => {
+        dispatch(displayLoading());
+        APIHandler.getMetaList(selectedTags)
+            .then(items => dispatch(setMetas(items)))
+            .catch(r => dispatch(setErrorMessage(String(r))))
+            .finally(() => dispatch(stopLoading())); 
+};
 
 /**
  * Request API to display file list for the selected path
@@ -318,16 +325,6 @@ export const loadAndDisplayFile = (fileName: string): MyThunk => (dispatch, getS
 };
 
 /**
- * Request API to get file tags  and display them
- */
-export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getState) => {
-        console.log('in Actions.loadAndEditTags')
-    dispatch(getFileContent(fileName));
-    dispatch(openDialog(DIALOGS.EDITTAGS));
-};
-
-
-/**
  * Request API to display an audio or video file
  */
 export const displaySelectedMediaFile = (): MyThunk => (dispatch, getState) => {
@@ -461,9 +458,8 @@ export const rightClickOnFile = (item: Item): MyThunk => (dispatch, getState) =>
     !isSelected && dispatch(selectItem(item));
 };
 
-
 // Create action which can be dispatched
-const makeActionCreator: <VALUE=void>(type: string) => (value: VALUE) => Action<VALUE> = <VALUE=void>(type: string) => (value: VALUE) => {
+const makeActionCreator: <VALUE = void>(type: string) => (value: VALUE) => Action<VALUE> = <VALUE = void>(type: string) => (value: VALUE) => {
     return {
         type,
         value
@@ -484,6 +480,8 @@ export const resetWebId = makeActionCreator(RESET_WEB_ID);
 export const setItems = makeActionCreator<Item[]>(SET_ITEMS);
 export const resetItems = () => setItems([]);
 
+export const setMetas = makeActionCreator<Meta[]>(SET_METAS);
+
 export const selectItems = makeActionCreator<Item[]>(SELECT_ITEMS);
 export const selectItem = (item: Item) => selectItems([item]);
 export const resetSelectedItems = () => selectItems([]);
@@ -499,7 +497,7 @@ export const stopLoading = makeActionCreator(STOP_LOADING);
 
 export const resetFileContent = makeActionCreator(RESET_LOADED_BLOB);
 export const setFileContent = makeActionCreator<Blob>(SET_LOADED_BLOB);
-export const setFileUploadList = makeActionCreator<FileList|null>(SET_UPLOAD_FILE_LIST);
+export const setFileUploadList = makeActionCreator<FileList | null>(SET_UPLOAD_FILE_LIST);
 export const resetFileUploadList = () => setFileUploadList(null);
 export const setFileUploadProgress = makeActionCreator<number>(SET_UPLOAD_FILE_PROGRESS);
 

@@ -1,0 +1,23 @@
+.MetaList {
+    display: flex;
+    flex-direction: column;
+}
+
+.MetaList .Meta .filename > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+@media (min-width : 600px) {
+    .MetaList .Meta {
+        float: left;
+        /*width: 33.3%;*/
+    }
+}
+@media (min-width : 1024px) {
+    .MetaList .Meta {
+        float: left;
+        /*width: 25%;*/
+    }
+}

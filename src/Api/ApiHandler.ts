@@ -2,7 +2,7 @@ import * as API from './Api';
 import JSZip from 'jszip';
 import { FileItem, FolderItem, Item } from './Item';
 import ApiCache from './ApiCache';
-import TagUtils, { Meta } from './TagUtils';
+import TagUtils, { Meta, MetaTag } from './TagUtils';
 
 const cache = new ApiCache();
 
@@ -109,7 +109,6 @@ export const renameFile = (path: string, fileName: string, newFileName: string):
         .catch(handleFetchError)
 };
 
-
 /**
  * Wrap API response for renaming a folder
  */
@@ -199,12 +198,19 @@ export const updateFile = (path: string, fileName: string, content: Blob|string)
 };
 
 /**
- * Wrap API response for file Meta definition (incluing tags)
+ * Wrap API response for save Meta definition (including its tags)
  */
-//export const updateMeta = (meta: Meta): Promise<Response> => {
 export const updateMeta = (meta: Meta) => {
-    console.log (`went through ApiHandler !`)
     TagUtils.updateMeta(meta)
+        .catch(handleFetchError);
+};
+
+/**
+ * Wrap API to load metas of selectedTags
+ */
+export const getMetaList = (selectedTags: MetaTag[]): Promise<Meta[]> => {
+    return TagUtils.getMetaList(selectedTags)
+        .then()
         .catch(handleFetchError);
 };
 

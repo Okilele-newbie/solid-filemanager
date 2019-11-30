@@ -54,7 +54,6 @@ export async function moveItems(path: string, destination: string, itemNames: st
 export async function editTags(path: string, oldName: string, newName: string): Promise<Response> {
     await copyFile(path, oldName, path, newName);
     return removeItem(path, oldName);
-    console.log('in Api.ts.edittags !!!')
 };
 
 /**
@@ -171,7 +170,7 @@ async function createItem(path: string, itemName: string, content: Blob|string, 
         headers: {
             link,
             slug: itemName,
-            'Content-Type': <any>undefined // TODO: This hack can be removed if this issue is fixed: https://github.com/solid/node-solid-server/issues/1165
+            'Content-Type': undefined as any // TODO: This hack can be removed if this issue is fixed: https://github.com/solid/node-solid-server/issues/1165
         },
         body: content
     };

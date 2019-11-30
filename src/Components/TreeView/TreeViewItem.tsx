@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import ListItem from "@material-ui/core/ListItem";
@@ -38,8 +38,6 @@ const MyListItemText = styled(ListItemText)({
     padding: '0 0px'
 });
 
-//                {Utils.blanks(colNumber)}
-//Utils.Blank()
 class TreeViewItem extends React.Component<TreeViewProps> {
 
     state = {} as IState;
@@ -107,6 +105,7 @@ interface TreeViewOwnProps {
     itemHandleClick(folder: IFolder): void;
     expColl: boolean
 }
+
 interface StateProps {
 }
 interface DispatchProps {

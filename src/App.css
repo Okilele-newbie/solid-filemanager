@@ -9,3 +9,7 @@
     flex-direction:row;
     flex-basis: auto
 }
+
+.leftView{
+    min-width: 35%
+}

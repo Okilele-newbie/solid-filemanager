@@ -1,0 +1,77 @@
+import React from 'react';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import TextField from '@material-ui/core/TextField';
+import './AppSearchForm.css'
+
+export default class AppSearchForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            suggests: null,
+            isLoading: false
+        };
+        this.handleChange = this.handleChange.bind(this);
+    }
+
+    handleChange(event) {
+        const str = event.target.value;
+        if (str !== "") {
+            this.setState({ suggests: null, isLoading: true });
+            //const tst = AppGetData(suggests, str)
+            AppGetData((suggests) => {
+                console.log(suggests)
+                this.setState({ suggests, isLoading: false })
+            }
+            , str);
+        }
+    }
+
+    userChoice(evt) {
+        var thisDiv = (evt) ? evt.target : window.event.srcElement;
+
+        document.getElementById("formulaire").value = thisDiv.innerHTML;
+        document.getElementById("popups").innerHTML = "";
+    }
+
+    render() {
+        const { suggests, isLoading } = this.state;
+        return (
+            <div>
+                <form action="">
+                    Search :
+                <TextField type="text" onChange={this.handleChange} />;
+                    <div id="popups"> </div>
+                </form>
+
+                {isLoading && <div>Please wait...</div>}
+                {suggests && this.printRows(suggests) dans la popup}
+            </div>
+        )
+    }
+
+    printRows(suggests) {
+
+        //const { suggests } = this.props;
+        if (suggests !== null) {
+            return (
+                suggests[1].map((item) => {
+                    console.log(item)
+                    return (
+                        <div className='cols'>
+                        <List>
+                            <ListItem>
+                                <ListItemText>
+                                    {item}
+                                </ListItemText>
+                            </ListItem>
+                        </List>
+                        </div>
+                    )
+                })
+            )
+        }
+    }
+
+}
