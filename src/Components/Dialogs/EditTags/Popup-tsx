@@ -1,0 +1,150 @@
+import React, { Component, ComponentType, TextFieldProps } from 'react';
+import Button from '@material-ui/core/Button';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputBase from '@material-ui/core/InputBase';
+import TextField from '@material-ui/core/TextField';
+import { styled } from '@material-ui/styles';
+import Autocomplete from '@material-ui/lab/Autocomplete';
+
+interface PopupProps {
+  searchString: string
+}
+
+interface PopupState {
+  suggests: string[],
+  openMenu: boolean
+}
+
+const MyMenuItem = styled(MenuItem)({
+  padding: '0 16px 0px 16px'
+});
+
+export default class Popup extends React.Component<PopupProps, PopupState> {
+  constructor(props: PopupProps) {
+    super(props);
+    this.state = {
+      suggests: [],
+      openMenu: false
+    };
+    this.handleChange = this.handleChange.bind(this);
+    //this.itemHandleClick = this.itemHandleClick.bind(this)
+  }
+
+  //selectTagField: React.ComponentType<TextFieldProps> = null
+  searchString = this.props.searchString
+
+  handleClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    //this.setAnchorEl(event.currentTarget);
+  };
+
+  //entering text for search
+  textFieldReference = {} as object
+  handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const str = event.target.value;
+    this.textFieldReference = event.target
+    if (str !== "") {
+      this.setState({ suggests: [] });
+      //(suggests: string[]) => {... = callback = function run when back
+      this.GetSuggestions((suggests: string[]) => {
+        this.setState({ suggests: suggests })
+      }
+        , str);
+      this.setState({ openMenu: true })
+    }
+  }
+
+  GetSuggestions = (callback1: {}, searchedString: string) => {
+    //callback1 : function to run when done, with 'response' as param
+    this.jsonp(
+      `http://suggestqueries.google.com/complete/search?client=firefox&q=${searchedString}`,
+      (response: []) => callback1(response)
+    );
+  }
+
+  jsonp = (url: string, callback2: {}) => {
+    //callback2 = from callback1 "(response: []) => callback1(response)". Translation: "return callback1(response)"
+    const callbackName: string = 'jsonp_callback_' + Math.round(100000 * Math.random());
+    //console.log(`callback 2${callback2}`)
+    window[callbackName] = function (data: any) {
+      delete window[callbackName];
+      document.body.removeChild(script);
+      callback2(data);
+    };
+
+    var script = document.createElement('script');
+    script.src =
+      url + (url.indexOf('?') >= 0 ? '&' : '?') + 'callback=' + callbackName;
+    document.body.appendChild(script);
+  };
+
+
+   defaultProps = {
+    options: [],
+    getOptionLabel: option => option,
+  };
+
+
+  render() {
+    const { suggests } = this.state;
+    defaultProps.options = suggests
+    return (
+      <div>
+        <Autocomplete
+          {...defaultProps}
+          id="disable-open-on-focus"
+          freeSolo
+          disableOpenOnFocus
+          renderInput={params => (
+            <TextField
+              {...params}
+              label="Tag" margin="normal" onChange={this.handleChange} fullWidth
+            />
+          )}
+        />
+      </div>
+
+    )
+  }
+
+  printRows(suggests: any[]) {
+    if (suggests !== null && suggests.length !== 0) {
+      const data: string[] = suggests[1]
+      if (data) {
+        return (
+          <List>
+            {data.map((item: React.ReactNode) => {
+              return (
+                <ListItem>
+                  <ListItemText>
+                    {item}
+                  </ListItemText>
+                </ListItem>
+              )
+            })
+            }
+
+          </List>
+
+        )
+      }
+    }
+    console.log(this.textFieldReference)
+
+  }
+
+  handleMenuClose = (item: string) => {
+    console.log(item)
+    //console.log(this.selectTagField)
+    //this.refs.selectTagField.inputRef = item
+    this.textFieldReference.value = item
+    //this.refs.selectTagField.getInputNode().value = item
+    this.setState({ openMenu: false })
+
+  };
+}
+
+

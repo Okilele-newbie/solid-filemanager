@@ -20,7 +20,7 @@ import blue from '@material-ui/core/colors/blue';
 import { AppState } from '../../Reducers/reducer';
 
 const MyListItem = styled(ListItem)({
-    padding: '0 16px 0px 16px',
+    padding: '0 16px 0px 16px'
 });
 
 const MyListItemText = styled(ListItemText)({

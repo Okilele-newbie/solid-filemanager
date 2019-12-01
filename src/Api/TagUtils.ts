@@ -20,6 +20,9 @@ export interface Meta {
     fileUrl: string,
     fileCreationDate?: string
     description?: string,
+    fileType?: string,
+    application?: string,
+    extension?: string,
     tags: MetaTag[],
 }
 
@@ -76,9 +79,9 @@ export default class TagUtils {
 
     //Get the met of an item
     static async getMeta(item: Item) {
-        console.log(`enter with item=${item.url}`)
+        //console.log(`enter with item=${item.url}`)
         let currentMeta = {} as Meta
-        console.log(`loading currentItemMeta ${currentMeta}`)
+        //console.log(`loading currentItemMeta ${currentMeta}`)
         if (this.currentMeta !== undefined
             && currentMeta.fileUrl !== undefined
             && currentMeta.fileUrl === this.currentItem.url)
@@ -92,7 +95,7 @@ export default class TagUtils {
             this.currentMeta = currentMeta
             this.currentItem = item
         }
-        console.log(`return ${currentMeta} with url=${currentMeta.fileUrl} and tags=${currentMeta.tags}`)
+        //console.log(`return ${currentMeta} with url=${currentMeta.fileUrl} and tags=${currentMeta.tags}`)
         return currentMeta
     }
 

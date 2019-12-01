@@ -1,0 +1,36 @@
+.react-select_container  {
+    position: absolute;
+    background-color: 'yellow';
+    color: 'green';
+    overflow: 'visible';
+}
+
+.react-select__menu  {
+    height: 300px;
+    position: absolute;
+    background-color: 'blue';
+    color: 'green';
+        overflow: 'visible';
+}
+
+
+.react-select__menu-list  {
+    height: 400px;
+    background-color: 'green';
+    color: 'green';
+        overflow: 'visible';    
+}
+
+
+.react-select__option  {
+    height: 20px;
+    background-color: 'pink';
+    color: 'green'
+}
+
+
+.css-2613qy-menu {
+    height: 500px;
+    background-color: 'blue';
+    color: 'green'
+}

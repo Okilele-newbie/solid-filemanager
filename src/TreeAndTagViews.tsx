@@ -14,7 +14,7 @@ interface State {
 export default class TreeAndTagViews extends Component<{}, State> {
 
     state = {
-        showTreeOrTag: false as boolean
+        showTreeOrTag: true as boolean
     }
 
     onChange() {

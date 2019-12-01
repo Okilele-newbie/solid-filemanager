@@ -73,7 +73,7 @@ export default class SolidFileClientUtils {
 
     //Interface method for FileClient.createFile
     static async FileClientcreateFile(url: string) {
-        console.log('Entering create file with url ' + url)
+        //console.log('Entering create file with url ' + url)
         FileClient.createFile(url)
             .then(
                 () => { return true }
@@ -83,7 +83,7 @@ export default class SolidFileClientUtils {
 
     //Interface method for FileClient.updateFile
     static async FileClientupdateFile(url: string, newContent: string) {
-        console.log('Entering update file with url ' + url)
+        //console.log('Entering update file with url ' + url)
         FileClient.updateFile(url, newContent)
             .then(
                 () => { return true }

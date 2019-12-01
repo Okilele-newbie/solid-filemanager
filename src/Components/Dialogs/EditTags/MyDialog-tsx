@@ -1,0 +1,19 @@
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import Dialog from '@material-ui/core/Dialog';
+
+const styles = {
+    dialogPaper: {
+        minHeight: '80vh',
+        maxHeight: '80vh',
+    },
+};
+
+const MyDialog = ({ classes: WithStyles<typeof styles1>}) => (
+    <Dialog classes={{ paper: classes.dialogPaper }}>
+        <div>dialogishness</div>
+    </Dialog>
+);
+
+export default withStyles(styles)(MyDialog);
