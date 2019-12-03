@@ -1,0 +1,28 @@
+.File {
+    cursor: pointer;
+    float: left;
+    display: block;
+    width: 99%;
+    user-select: none;
+}
+
+.FileList .filename > span {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.File:hover {
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.File[data-selected=true] {
+    background-color: #e8f0fe;
+    
+}
+
+.File[data-selected=true],
+.File[data-selected=true] > li > div > span {
+    color: #1967d2;
+}

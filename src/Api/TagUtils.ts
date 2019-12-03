@@ -18,43 +18,27 @@ export interface MetaTag {
 
 export interface Meta {
     fileUrl: string,
-    fileCreationDate?: string
-    description?: string,
-    fileType?: string,
-    application?: string,
-    extension?: string,
+    description: string,
+    fileType: string,
+    application: string,
+    extension: string,
     tags: MetaTag[],
 }
 
 
 const tagDir = '/public'
-const tagFileName = '_Meta2.json'
+const tagFileName = '_Meta4.json'
 
 export default class TagUtils {
 
     static allMetas = [] as Meta[];
     static currentMeta = {} as Meta;
-    static libraryTags = [] as Tag[];
     static currentItem = {} as Item
 
     static getTagIndexFullPath() {
         //console.log(`Location of indexes tags: ${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`)
         return `${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`
         //return `https://okilele.solid.community/public/tagI1.json`
-    }
-
-    static getLibraryTags() {
-        let libraryTags = [] as Tag[]
-        if (this.libraryTags.length !== 0) libraryTags = this.libraryTags
-        else {
-            libraryTags.push(...this.getExtMimeTags());
-            libraryTags.push(...this.getNamedTags());
-            libraryTags.push(...this.getAppsTags());
-            //add current item reference so that tags are ready to be recorded if selected
-            //console.log(`Found ${libraryTags.length} tags in the library of tags`)
-            this.libraryTags = libraryTags
-        }
-        return libraryTags
     }
 
     static async getAllMetas() {
@@ -72,34 +56,138 @@ export default class TagUtils {
         return allMetas as unknown as Meta[]
     }
 
-//List of selected tags
-    static async getMetaList(selectedTag: MetaTag[]): Promise<Meta[]> {
-        return await this.getAllMetas() as unknown as Meta[]
+    static filterByValue(metas: Meta[], string: string) {
+        return metas.filter(
+            (meta: Meta) => Object.keys(meta.tags).some(tag => tag === string)
+        );
+    }
+
+
+    static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
+        return lodash.filter(metas, function (meta) {
+            return lodash.some(meta.tags, function (tag) {
+                return (tag.value === testTag.value);
+            });
+        });
+    }
+
+
+    //List of selected tags
+    static async getMetaList(selectedTags: MetaTag[]) {
+        /*
+        let filteredMetas = [] as Meta[]
+        await this.getAllMetas() as unknown as Meta[]
+        filteredMetas = response.filter(el => (el.fileUrl === selectedTag[0].value))
+        return filteredMetas
+        */
+        //const existingMeta = allMetas.filter(el => el.fileUrl === item.getUrl())[0];
+
+
+        //filteredMetas = allMetas.filter(el => (el.fileUrl === selectedTag[0].value))
+        //function(o) { return !o.active; }
+        //foundTagsU = lodash.sortBy(foundTagsU, ['tagType', 'value']);
+        //const filteredMetas = lodash.filter(allMetas, meta => {meta.tags => {tag.value === selectedTag[0].value}})
+        //const filteredMetas = lodash.filter(allMetas, function (meta) {function (meta.tags) (tag.value === selectedTag[0].value)))
+        //AND
+
+        //return await this.getAllMetas() as unknown as Meta[]
+
+        const allMetas = await this.getAllMetas() as unknown as Meta[]
+        let filteredMetas = [] as Meta[]
+        //Create a list of copies of metas filtered by view selection and only wearing selected tags
+        if (false) {
+            //AND
+            let filteredMetas = allMetas
+            selectedTag.map(testTag => {
+                filteredMetas = filteredMetas.filter(({ meta }) => meta.tags.includes(testTag))
+            })
+        } else {
+            //OR   
+            selectedTags.map((testTag) => {
+                //get new metas for the tag and reset tags to testTag
+                console.log(`working on ${testTag.value}`)
+                //let havingTagMetas = allMetas.filter(({ tags }) => tags.includes(testTag))
+                //let havingTagMetas = this.filterByValue(allMetas, testTag.value)
+                let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
+                //let havingTagMetax = allMetas.filter(meta => meta.tags.includes(testTag))
+                //let havingTagMetay = allMetas.filter(({ tags }) => tags.includes(testTag))
+                //let havingTagMetaz = allMetas.filter(meta => (meta.tags => (tag.value === testTag.value)))
+
+                console.log(`  found ${havingTagMetas.length} in allMeta`)
+                havingTagMetas.map(newMeta => {
+                    console.log(`      searching ${newMeta.fileUrl}] in existingFilteredMeta having ${filteredMetas.length} items`)
+                    //search already in filtered
+                    let existingFilteredMeta =
+                        lodash.find(filteredMetas, function (meta) { return newMeta.fileUrl === meta.fileUrl })
+                    if (existingFilteredMeta !== undefined) {
+                        console.log(`      found 1 in filteredMetas: ${existingFilteredMeta.fileUrl}`)
+                        existingFilteredMeta.tags.push(testTag)
+                        console.log(`      and added tag to it`)
+                    } else {
+                        // works correctly ? let newMetaCopy = Object.assign({}, newMeta)
+                        let newMetaCopy = {
+                            'fileUrl': newMeta.fileUrl,
+                            'description': newMeta.description,
+                            'fileType': newMeta.fileType,
+                            'application': newMeta.application,
+                            'extension': newMeta.extension,
+                            'tags': newMeta.tags,
+                        }
+                        newMetaCopy.tags = [testTag]
+                        //add a new object as meta in filtered are "fakes" having only selected tags of the current view
+                        filteredMetas.push(newMetaCopy)
+                        console.log(`      not found in filtered and added new meta ${newMeta.fileUrl}`)
+
+                    }
+                })
+            })
+        }
+        /*
+                        newMetas.map(meta => {
+                            meta.tags = [testTag]
+                        })
+                        //add testTag to existing filtered metas
+                        filteredMetas.filter(({ tags }) => tags.includes(testTag)).map(meta => {
+                            meta.tags.push(testTag)
+                        })
+                        //add new to existing
+                        filteredMetas.push(...newMetas)
+        */
+        lodash.sortBy(filteredMetas, 'value')
+        return filteredMetas
     }
 
     //Get the met of an item
-    static async getMeta(item: Item) {
+    static async getOrInitMeta(item: Item) {
         //console.log(`enter with item=${item.url}`)
-        let currentMeta = {} as Meta
-        //console.log(`loading currentItemMeta ${currentMeta}`)
+        //init in case this one is returned
+        let meta = {
+            fileUrl: item.getUrl(),
+            description: '',
+            fileType: '',
+            application: '',
+            extension: item.getDisplayName().split('.').length > 1 ? item.getDisplayName().split('.').pop() : '',
+            tags: []
+        } as Meta
+        //console.log(`loading currentItemMeta ${meta}`)
         if (this.currentMeta !== undefined
-            && currentMeta.fileUrl !== undefined
-            && currentMeta.fileUrl === this.currentItem.url)
-            currentMeta = this.currentMeta
+            && this.currentMeta.fileUrl === item.url)
+            meta = this.currentMeta
         else {
             const allMetas: Meta[] = await this.getAllMetas()
             if (allMetas !== undefined) {
-                currentMeta = allMetas.filter(el => el.fileUrl === item.getUrl())[0];
+                const existingMeta = allMetas.filter(el => el.fileUrl === item.getUrl())[0];
+                if (existingMeta !== undefined) meta = existingMeta
             }
-            if (currentMeta === undefined) (currentMeta = { fileUrl: item.url, tags: [] })
-            this.currentMeta = currentMeta
-            this.currentItem = item
         }
-        //console.log(`return ${currentMeta} with url=${currentMeta.fileUrl} and tags=${currentMeta.tags}`)
-        return currentMeta
+        this.currentMeta = meta
+        this.currentItem = item
+        //console.log(`return ${meta} with url=${meta.fileUrl} and tags=${meta.tags}`)
+        return meta
     }
 
     static async updateMeta(meta: Meta) {
+        console.log(`call TagUtols.updatemeta, ${meta}`)
         let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
         // remove previous tags of the item
         allMetas = allMetas.filter(el => el.fileUrl !== meta.fileUrl);
@@ -130,89 +218,5 @@ export default class TagUtils {
         return foundTagsU as unknown as MetaTag[]
     }
 
-    static getExtMimeTags() {
-        return this.mockGetExtMimeTags()
-    }
-
-    static getNamedTags() {
-        return this.mockGetNamedTags()
-    }
-
-    static getAppsTags() {
-        return this.mockGetAppNameTags()
-    }
-
-    static mockGetExtMimeTags() {
-        var json = {
-            list: [
-                {
-                    tagType: "ext/MIME",
-                    value: "text-plain",
-                    displayedValue: "",
-                    description: "Used for text editable in notepad-like editors for instance"
-                },
-                {
-                    tagType: "ext-MIME",
-                    value: "png",
-                    displayedValue: "",
-                    description: "png extension"
-                },
-                {
-                    tagType: "ext-MIME",
-                    value: "multipart/mixed",
-                    displayedValue: "",
-                    description: "Mixed content"
-                }
-
-            ]
-        }
-        return json.list
-    }
-
-    static mockGetNamedTags() {
-        var json = {
-            list: [
-                {
-                    tagType: "NamedTag",
-                    value: "http://solid.community/ontology/cooking",
-                    displayedValue: "Cooking",
-                    description: "Solid community description of cooking"
-                },
-                {
-                    tagType: "NamedTag",
-                    value: "http://some.org/conputing",
-                    displayedValue: "Computing",
-                    description: "Conputing as in some.org ontology"
-                },
-                {
-                    tagType: "NamedTag",
-                    value: "http://someother.org/conputing",
-                    displayedValue: "Computing",
-                    description: "Conputing as in someother.org ontology"
-                }
-            ]
-        }
-        return json.list
-    }
-
-    static mockGetAppNameTags() {
-        var json = {
-            list: [
-                {
-                    tagType: "AppName",
-                    value: "http://solid.community/applist/solidfb",
-                    displayedValue: "Solid Facebook",
-                    description: "Solid Facebook like"
-                },
-                {
-                    tagType: "AppName",
-                    value: "http://solid.community/applist/solidagram",
-                    displayedValue: "Solidagram",
-                    description: "Solid Instagram like"
-                },
-            ]
-        }
-        return json.list
-    }
 
 }

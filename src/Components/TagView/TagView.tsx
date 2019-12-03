@@ -42,9 +42,12 @@ export class TagView extends Component<TagViewProps> {
             .then(() => this.setState({ loading: false }))
     }
 
-    handleCheck(tag: MetaTag) {
+    handleCheck(metaTag: MetaTag, event: React.ChangeEvent<HTMLSelectElement>) {
         //event.preventDefault();
-        this.selectedTags.push(tag)
+        const i: number = this.selectedTags.indexOf(metaTag)
+        i !== -1
+            ? this.selectedTags.splice(i, 1)
+            : this.selectedTags.push(metaTag)
         this.props.handleSubmit(this.selectedTags);
     }
 
@@ -64,31 +67,23 @@ export class TagView extends Component<TagViewProps> {
                     //const labelId = `checkbox-list-label-${key}`;
                     return (
                         <MyListItem
-                            key={`${tag.tagType}-${tag.description}`}
+                            key={tag.value}
                             role={undefined}
                             dense button
                         >
                             <MyCheckbox
-                                onChange={e => this.handleCheck(tag)}
+                                onChange={e => this.handleCheck(tag, e)}
                             />
                             <MyListItemText
                                 id={tag.value}
-                            />
-                            {tag.displayedValue !== undefined
-                                ? `${tag.displayedValue}`
-                                : (tag.description !== undefined
-                                    ? `${tag.description}`
-                                    : (tag.value !== undefined
-                                        ? `${tag.value}`
-                                        : null)
-                                )
+                            >
+                                {`${tag.value}`}
 
-                            }
+                            </MyListItemText>
                         </MyListItem>
-                    );
-                })
-                }
-            </MyList >
+                    )
+                })}
+            </MyList>
         )
     }
 }

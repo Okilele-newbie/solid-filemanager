@@ -134,9 +134,9 @@ export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getStat
 };
 
 export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
+        console.log(`callActions.upfatemeta, ${meta}`)
     APIHandler.updateMeta(meta)
     dispatch(closeDialog(DIALOGS.EDITTAGS));
-
 }
 
 /**

@@ -85,8 +85,6 @@ export default class TreeView extends Component {
     }
 
     async initFolders() {
-
-        //await SolidFileClientUtils.FileClientPopupLogin()
         this.folder = await SolidFileClientUtils.FileClientReadFolder(
             SolidFileClientUtils.getServerId()
         )

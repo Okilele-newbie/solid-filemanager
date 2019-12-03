@@ -13,6 +13,8 @@ import { initApp, MyDispatch, closeContextMenu } from './Actions/Actions';
 import DynamicSnackbar from './Components/Notification/DynamicSnackbar';
 import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
 
+import SolidFileClientUtils from './Api/SolidFileClientUtils';
+
 import './App.css'
 
 const theme = createMuiTheme({
@@ -31,7 +33,6 @@ class App extends Component<AppProps> {
     };
 
     render() {
-
         return (
             <div className="App">
                 <MaterialUI theme={theme}>

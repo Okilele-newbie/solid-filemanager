@@ -12,7 +12,9 @@ class MetaList extends Component<MetaListProps> {
     render() {
         const { metas, isLoading } = this.props;
         const itemComponents = metas.map((meta, key) => {
-            return <MetaRow meta={meta}  />;
+            return <MetaRow 
+                key ={meta.fileUrl}
+                meta={meta}  />;
         });
 
         return <div className="MetaList">

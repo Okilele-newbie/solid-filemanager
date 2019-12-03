@@ -3,7 +3,7 @@ import DialogMenu from './Menu/Menu';
 import DialogContent from './Content/Content';
 import DialogMedia from './Media/Media';
 import DialogEdit from './Edit/Edit';
-import DialogEditTags from './EditTags/EditTagsList';
+import DialogEditTags from './EditTags/EditTags';
 import DialogCreateFolder from './CreateFolder/CreateFolder';
 import DialogCreateFile from './CreateFile/CreateFile';
 import DialogRename from './Rename/Rename';

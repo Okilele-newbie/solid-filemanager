@@ -37,6 +37,13 @@ export default class SolidFileClientUtils {
     }
 
     static async FileClientReadFolder(fileName: string) {
+        await this.FileClientPopupLogin('https://okilele.solid.community/')
+
+
+        if (fileName.indexOf('Meta') !== -1) {
+            console.log('found')
+        }
+
         let res = {} as IFolder;
         await FileClient.readFolder(fileName).then((content: IFolder) => {
             content.name = decodeURI(content.name)
@@ -44,13 +51,13 @@ export default class SolidFileClientUtils {
                 f.name = decodeURI(f.name)
                 f.folders = []
             })
-            //console.log(`FileClientReadFolder read ${fileName} and return ${content.url}`)
-            //return content
             res = content
-        }, (err: any) => { 
+        }, (err: any) => {
             console.log(`Not able to read folder ${fileName}`)
-            throw new Error("copy download error  " + err) });
+            throw new Error("Read folder error  " + err)
+        });
         return res
+
     }
 
 
