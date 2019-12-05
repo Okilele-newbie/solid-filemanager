@@ -1,6 +1,7 @@
 import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
-import { Item } from '../Api/Item';
+import { Item } from './Item';
+import {UpdateMetaInCouchDb, GetMetaInCouchDb} from './cors';
 
 export interface Tag {
     tagType: string,
@@ -27,7 +28,7 @@ export interface Meta {
 
 
 const tagDir = '/public'
-const tagFileName = '_Meta4.json'
+const tagFileName = '_Meta5.json'
 
 export default class TagUtils {
 
@@ -62,57 +63,24 @@ export default class TagUtils {
         );
     }
 
-
-    static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
-        return lodash.filter(metas, function (meta) {
-            return lodash.some(meta.tags, function (tag) {
-                return (tag.value === testTag.value);
-            });
-        });
-    }
-
-
     //List of selected tags
     static async getMetaList(selectedTags: MetaTag[]) {
-        /*
-        let filteredMetas = [] as Meta[]
-        await this.getAllMetas() as unknown as Meta[]
-        filteredMetas = response.filter(el => (el.fileUrl === selectedTag[0].value))
-        return filteredMetas
-        */
-        //const existingMeta = allMetas.filter(el => el.fileUrl === item.getUrl())[0];
-
-
-        //filteredMetas = allMetas.filter(el => (el.fileUrl === selectedTag[0].value))
-        //function(o) { return !o.active; }
-        //foundTagsU = lodash.sortBy(foundTagsU, ['tagType', 'value']);
-        //const filteredMetas = lodash.filter(allMetas, meta => {meta.tags => {tag.value === selectedTag[0].value}})
-        //const filteredMetas = lodash.filter(allMetas, function (meta) {function (meta.tags) (tag.value === selectedTag[0].value)))
-        //AND
-
-        //return await this.getAllMetas() as unknown as Meta[]
 
         const allMetas = await this.getAllMetas() as unknown as Meta[]
         let filteredMetas = [] as Meta[]
         //Create a list of copies of metas filtered by view selection and only wearing selected tags
         if (false) {
             //AND
-            let filteredMetas = allMetas
-            selectedTag.map(testTag => {
-                filteredMetas = filteredMetas.filter(({ meta }) => meta.tags.includes(testTag))
-            })
+            //let filteredMetas = allMetas
+            //selectedTags.map(testTag => {
+            //    filteredMetas = filteredMetas.filter(({ meta: Meta }) => meta.tags.includes(testTag))
+            //})
         } else {
             //OR   
             selectedTags.map((testTag) => {
-                //get new metas for the tag and reset tags to testTag
+                //get new metas for testTag and reset its tags to testTag
                 console.log(`working on ${testTag.value}`)
-                //let havingTagMetas = allMetas.filter(({ tags }) => tags.includes(testTag))
-                //let havingTagMetas = this.filterByValue(allMetas, testTag.value)
                 let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
-                //let havingTagMetax = allMetas.filter(meta => meta.tags.includes(testTag))
-                //let havingTagMetay = allMetas.filter(({ tags }) => tags.includes(testTag))
-                //let havingTagMetaz = allMetas.filter(meta => (meta.tags => (tag.value === testTag.value)))
-
                 console.log(`  found ${havingTagMetas.length} in allMeta`)
                 havingTagMetas.map(newMeta => {
                     console.log(`      searching ${newMeta.fileUrl}] in existingFilteredMeta having ${filteredMetas.length} items`)
@@ -124,7 +92,6 @@ export default class TagUtils {
                         existingFilteredMeta.tags.push(testTag)
                         console.log(`      and added tag to it`)
                     } else {
-                        // works correctly ? let newMetaCopy = Object.assign({}, newMeta)
                         let newMetaCopy = {
                             'fileUrl': newMeta.fileUrl,
                             'description': newMeta.description,
@@ -137,32 +104,36 @@ export default class TagUtils {
                         //add a new object as meta in filtered are "fakes" having only selected tags of the current view
                         filteredMetas.push(newMetaCopy)
                         console.log(`      not found in filtered and added new meta ${newMeta.fileUrl}`)
-
                     }
                 })
             })
         }
-        /*
-                        newMetas.map(meta => {
-                            meta.tags = [testTag]
-                        })
-                        //add testTag to existing filtered metas
-                        filteredMetas.filter(({ tags }) => tags.includes(testTag)).map(meta => {
-                            meta.tags.push(testTag)
-                        })
-                        //add new to existing
-                        filteredMetas.push(...newMetas)
-        */
         lodash.sortBy(filteredMetas, 'value')
         return filteredMetas
+    }
+
+    static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
+        return lodash.filter(metas, function (meta) {
+            return lodash.some(meta.tags, function (tag) {
+                return (tag.value === testTag.value);
+            });
+        });
     }
 
     //Get the met of an item
     static async getOrInitMeta(item: Item) {
         //console.log(`enter with item=${item.url}`)
         //init in case this one is returned
+        //const itemUrl = item.getUrl().replace(/(^\w+:|^)\/\//, '')
+        let itemUrl = item.getUrl()
+        if (itemUrl.indexOf('http') !== -1) itemUrl = itemUrl.split('://')[1]
+        //let reg = new RegExp("[(^\w+:|^)\/\/]", "g")
+        //itemUrl = itemUrl.replace(reg, '')
+        let reg = new RegExp("[/]", "g")
+        itemUrl = itemUrl.replace(reg, '.')
+        //itemUrl.indexOf('http')  !== -1 ? itemUrl = itemUrl.slice(4) : itemUrl
         let meta = {
-            fileUrl: item.getUrl(),
+            fileUrl: itemUrl,
             description: '',
             fileType: '',
             application: '',
@@ -171,12 +142,12 @@ export default class TagUtils {
         } as Meta
         //console.log(`loading currentItemMeta ${meta}`)
         if (this.currentMeta !== undefined
-            && this.currentMeta.fileUrl === item.url)
+            && this.currentMeta.fileUrl === itemUrl)
             meta = this.currentMeta
         else {
             const allMetas: Meta[] = await this.getAllMetas()
             if (allMetas !== undefined) {
-                const existingMeta = allMetas.filter(el => el.fileUrl === item.getUrl())[0];
+                const existingMeta = allMetas.filter(el => el.fileUrl === itemUrl)[0]
                 if (existingMeta !== undefined) meta = existingMeta
             }
         }
@@ -187,6 +158,7 @@ export default class TagUtils {
     }
 
     static async updateMeta(meta: Meta) {
+        //FILE
         console.log(`call TagUtols.updatemeta, ${meta}`)
         let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
         // remove previous tags of the item
@@ -198,6 +170,11 @@ export default class TagUtils {
             TagUtils.getTagIndexFullPath(),
             JSON.stringify(allMetas)
         )
+
+        //COUCHDB
+        UpdateMetaInCouchDb(meta)
+
+        //FINALLY
         this.currentMeta = meta
         this.allMetas = allMetas
     }
