@@ -1,23 +1,42 @@
 .MetaList {
+    cursor: pointer;
+    float: left;
+    display: block;
+    width: 99%;
+    user-select: none;
     display: flex;
-    flex-direction: column;
+    flex-direction: column;    
 }
 
-.MetaList .Meta .filename > span {
+.MetaRow .metaname > span {
     text-overflow: ellipsis;
     overflow: hidden;
     white-space: nowrap;
 }
 
+
+.MetaRow:hover {
+    cursor: pointer;
+    background: #fafafa;
+}
+
+.MetaRow[data-selected=true] {
+    background-color: #e8f0fe;
+    
+}
+
+.MetaRow[data-selected=true],
+.MetaRow[data-selected=true] > li > div > span {
+    color: #1967d2;
+}
+
 @media (min-width : 600px) {
-    .MetaList .Meta {
+    .MetaList .MetaRow {
         float: left;
-        /*width: 33.3%;*/
     }
 }
 @media (min-width : 1024px) {
-    .MetaList .Meta {
+    .MetaList .MetaRow {
         float: left;
-        /*width: 25%;*/
     }
 }

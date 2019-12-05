@@ -7,6 +7,7 @@ import Loader from '../Loader/Loader';
 import './Meta.css';
 import { Meta } from '../../Api/TagUtils';
 import { AppState } from '../../Reducers/reducer';
+import './Meta.css';
 
 class MetaList extends Component<MetaListProps> {
     render() {

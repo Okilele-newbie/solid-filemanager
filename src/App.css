@@ -4,7 +4,7 @@
     flex-basis: auto
 }
 
-.treeAndTagViews{
+.treeAndTagList{
     display:flex; 
     flex-direction:row;
     flex-basis: auto

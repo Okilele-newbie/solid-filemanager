@@ -57,7 +57,6 @@ export default class SolidFileClientUtils {
             throw new Error("Read folder error  " + err)
         });
         return res
-
     }
 
 

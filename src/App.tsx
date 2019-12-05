@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import TreeAndTagViews from './TreeAndTagViews';
+import TreeAndTagList from './TreeAndTagList';
 import FileList from './Components/FileList/FileList';
 import Navbar from './Components/Navbar/Navbar';
 import ContextMenu from './Components/ContextMenu/ContextMenu';
@@ -38,7 +38,7 @@ class App extends Component<AppProps> {
                 <MaterialUI theme={theme}>
                     <div onClick={this.props.handleHideContextMenu} onContextMenu={this.props.handleHideContextMenu}>
                         <Navbar />
-                        <TreeAndTagViews />
+                        <TreeAndTagList />
                         <ContextMenu />
                         <DynamicSnackbar />
                         <Dialogs />

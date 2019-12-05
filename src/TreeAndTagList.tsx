@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Switch from '@material-ui/core/Switch';
 import TreeView from './Components/TreeView/TreeView';
-import TagView from './Components/TagView/TagView';
+import TagList from './Components/TagList/TagList';
 import FileList from './Components/FileList/FileList';
 import MetaList from './Components/Meta/MetaList';
 
@@ -11,7 +11,7 @@ interface State {
     showTreeOrTag: boolean;
 }
 
-export default class TreeAndTagViews extends Component<{}, State> {
+export default class TreeAndTagList extends Component<{}, State> {
 
     state = {
         showTreeOrTag: true as boolean
@@ -41,7 +41,7 @@ export default class TreeAndTagViews extends Component<{}, State> {
                     </div>
                     :
                     <div className='bodyPlace'>
-                        <TagView />
+                        <TagList />
                         <MetaList />
                     </div>
                 }
