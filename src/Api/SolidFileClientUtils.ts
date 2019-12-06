@@ -20,7 +20,7 @@ export default class SolidFileClientUtils {
     static serverId: string = ''
 
     //Interface method for FileClient.popupLogin
-    static async FileClientPopupLogin(webId: string) {
+    static async fileClientPopupLogin(webId: string) {
         await FileClient.popupLogin()
             .then(
                 (webId: string) => {
@@ -36,8 +36,8 @@ export default class SolidFileClientUtils {
         return 'https://okilele.solid.community'
     }
 
-    static async FileClientReadFolder(fileName: string) {
-        await this.FileClientPopupLogin('https://okilele.solid.community/')
+    static async fileClientReadFolder(fileName: string) {
+        await this.fileClientPopupLogin('https://okilele.solid.community/')
 
 
         if (fileName.indexOf('Meta') !== -1) {
@@ -61,24 +61,24 @@ export default class SolidFileClientUtils {
 
 
     //Interface method for FileClient.readFile
-    static async FileClientReadFileAsString(url: string) {
+    static async fileClientReadFileAsString(url: string) {
         //console.log('Entering read file with url ' + url)
         let res: string = ''
         await FileClient.readFile(url).then(
             (body: string) => {
                 res = body
-                //console.log(`In of FileClientReadFileAsString with res=${res}`)
+                //console.log(`In of fileClientReadFileAsString with res=${res}`)
             }
             , (err: any) => {
                 console.log(`Error when reading file ${url}, returning blank`)
                 //throw new Error("read error  " + err)
             });
-        //console.log(`Out of FileClientReadFileAsString with res=${res}`)
+        //console.log(`Out of fileClientReadFileAsString with res=${res}`)
         return res as string
     }
 
     //Interface method for FileClient.createFile
-    static async FileClientcreateFile(url: string) {
+    static async fileClientcreateFile(url: string) {
         //console.log('Entering create file with url ' + url)
         FileClient.createFile(url)
             .then(
@@ -88,7 +88,7 @@ export default class SolidFileClientUtils {
     }
 
     //Interface method for FileClient.updateFile
-    static async FileClientupdateFile(url: string, newContent: string) {
+    static async fileClientupdateFile(url: string, newContent: string) {
         //console.log('Entering update file with url ' + url)
         FileClient.updateFile(url, newContent)
             .then(

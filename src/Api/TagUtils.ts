@@ -1,7 +1,7 @@
 import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
 import { Item } from './Item';
-import {UpdateMetaInCouchDb, GetMetaInCouchDb} from './cors';
+import {updateMetaInCouchDb, getMetaInCouchDb} from './cors';
 
 export interface Tag {
     tagType: string,
@@ -18,17 +18,18 @@ export interface MetaTag {
 }
 
 export interface Meta {
-    fileUrl: string,
+    fileUrl: string,//without "https://", used as CouchDB id
     description: string,
     fileType: string,
     application: string,
     extension: string,
+    owner: string,//only for use in CouchDb as derived from fileUrl
     tags: MetaTag[],
 }
 
 
 const tagDir = '/public'
-const tagFileName = '_Meta5.json'
+const tagFileName = '_Meta6.json'
 
 export default class TagUtils {
 
@@ -37,16 +38,14 @@ export default class TagUtils {
     static currentItem = {} as Item
 
     static getTagIndexFullPath() {
-        //console.log(`Location of indexes tags: ${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`)
         return `${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`
-        //return `https://okilele.solid.community/public/tagI1.json`
     }
 
     static async getAllMetas() {
         let allMetas = [] as Meta[]
         if (this.allMetas.length !== 0) allMetas = this.allMetas
         else {
-            var json: string = await SolidFileClientUtils.FileClientReadFileAsString(TagUtils.getTagIndexFullPath())
+            var json: string = await SolidFileClientUtils.fileClientReadFileAsString(TagUtils.getTagIndexFullPath())
             //console.log(`json for allTags=>>${json}<<`)
             if (json !== '') {
                 allMetas = JSON.parse(json)
@@ -129,8 +128,8 @@ export default class TagUtils {
         if (itemUrl.indexOf('http') !== -1) itemUrl = itemUrl.split('://')[1]
         //let reg = new RegExp("[(^\w+:|^)\/\/]", "g")
         //itemUrl = itemUrl.replace(reg, '')
-        let reg = new RegExp("[/]", "g")
-        itemUrl = itemUrl.replace(reg, '.')
+        //let reg = new RegExp("[/]", "g")
+        //itemUrl = itemUrl.replace(reg, '.')
         //itemUrl.indexOf('http')  !== -1 ? itemUrl = itemUrl.slice(4) : itemUrl
         let meta = {
             fileUrl: itemUrl,
@@ -138,6 +137,7 @@ export default class TagUtils {
             fileType: '',
             application: '',
             extension: item.getDisplayName().split('.').length > 1 ? item.getDisplayName().split('.').pop() : '',
+            owner: itemUrl.split("/")[0],
             tags: []
         } as Meta
         //console.log(`loading currentItemMeta ${meta}`)
@@ -166,13 +166,13 @@ export default class TagUtils {
 
         //Add new meta
         allMetas.push(meta)
-        SolidFileClientUtils.FileClientupdateFile(
+        SolidFileClientUtils.fileClientupdateFile(
             TagUtils.getTagIndexFullPath(),
             JSON.stringify(allMetas)
         )
 
         //COUCHDB
-        UpdateMetaInCouchDb(meta)
+        updateMetaInCouchDb(meta)
 
         //FINALLY
         this.currentMeta = meta

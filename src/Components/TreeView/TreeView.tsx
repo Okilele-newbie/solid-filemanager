@@ -85,7 +85,7 @@ export default class TreeView extends Component {
     }
 
     async initFolders() {
-        this.folder = await SolidFileClientUtils.FileClientReadFolder(
+        this.folder = await SolidFileClientUtils.fileClientReadFolder(
             SolidFileClientUtils.getServerId()
         )
         //get folders in the root
@@ -108,11 +108,11 @@ export default class TreeView extends Component {
         if (!item.full) {
             for (var i = 0; i < item.folders.length; i++) {
                 //console.log(`      - adding subfolder to level 0: ${item.folders[i].url}`)
-                item.folders[i] = await SolidFileClientUtils.FileClientReadFolder(item.folders[i].url)
+                item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
                 for (var j = 0; j < item.folders[i].folders.length; j++) {
                     try {
                         item.folders[i].folders[j] =
-                            await SolidFileClientUtils.FileClientReadFolder(item.folders[i].folders[j].url)
+                            await SolidFileClientUtils.fileClientReadFolder(item.folders[i].folders[j].url)
                     } catch (err) {
                         //Error on some damaged folders, skip ...
                     }

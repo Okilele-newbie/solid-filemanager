@@ -49,32 +49,3 @@ export default class TreeAndTagList extends Component<{}, State> {
         );
     }
 }
-
-/*
-interface DispatchProps {
-    init(): void;
-    handleHideContextMenu(event: React.MouseEvent<HTMLDivElement, MouseEvent>): void;
-}
-
-interface AppProps extends DispatchProps { }
-
-const mapStateToProps = () => ({});
-
-const mapDispatchToProps = (dispatch: MyDispatch): DispatchProps => {
-    return {
-        init: () => {
-            dispatch(initApp());
-        },
-
-        handleHideContextMenu: (event) => {
-            const element = event.target as HTMLElement;
-            if (!(element.tagName === 'INPUT' || /label/i.test(element.className))) {
-                event.preventDefault();
-            }
-            dispatch(closeContextMenu());
-        }
-    };
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(App);
-*/
