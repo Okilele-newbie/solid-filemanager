@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta, MetaTag, zeroWidthSpace } from '../../../Api/TagUtils';
+import { Meta, Io } from '../../../Api/TagUtils';
 import CreatableSelect from 'react-select/creatable';
 import CallJsonP from '../../../Api/jsonp';
 
@@ -11,13 +11,12 @@ interface PopupState {
     suggests: Io[]
 }
 
-interface Io {
-    label: string,
-    value: string,
-    published: boolean
+interface MultiValueLabelProps {
+    children: {}
+    data: Io
 }
 
-class MultiValueLabel extends React.Component {
+class MultiValueLabel extends React.Component<MultiValueLabelProps> {
     red = {
         color: "red"
     };

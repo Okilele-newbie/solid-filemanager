@@ -6,11 +6,11 @@ export interface CouchDbRow {
 }
 
 
-export default class TagUtils {
+export default class CouchDb {
 
   static couchDbServerUrl = `http://127.0.0.1:5984`
   static couchDbDatabaseName = `solidfilemanager`
-  static couchDbBaseUrl = `${TagUtils.couchDbServerUrl}/${TagUtils.couchDbDatabaseName}`
+  static couchDbBaseUrl = `${CouchDb.couchDbServerUrl}/${CouchDb.couchDbDatabaseName}`
 
   // unused.
   static getMetaFromCouchDb(id: string) {
@@ -33,7 +33,7 @@ export default class TagUtils {
       xhr.onload = function () {
         const oldMeta = JSON.parse(xhr.responseText)
         if (oldMeta && oldMeta._rev) meta._rev = oldMeta._rev
-        TagUtils.writeMetaInCouchDb(meta)
+        CouchDb.writeMetaInCouchDb(meta)
       }
       xhr.onerror = function () {
         alert('Error calling UpdateMetaInCouchDb.');

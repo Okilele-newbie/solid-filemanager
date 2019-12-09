@@ -1,7 +1,7 @@
 import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
 import { Item } from './Item';
-import Cors, {CouchDbRow} from './Cors';
+import CouchDb, {CouchDbRow} from './CouchDb';
 
 const tagDir = '/public'
 const tagFileName = '_Meta7.json'
@@ -9,6 +9,13 @@ const tagFileName = '_Meta7.json'
 //Same as Tag without description for Meta
 export interface MetaTag {
     tagType: string,
+    value: string,
+    published: boolean
+}
+
+//MetaTags in autocomplete component and EditTag
+export interface Io {
+    label: string,
     value: string,
     published: boolean
 }
@@ -77,29 +84,24 @@ export default class TagUtils {
                 console.log(`working on ${testTag.value}`)
                 let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
                 console.log(`  found ${havingTagMetas.length} in allMeta`)
-                havingTagMetas.map(newMeta => {
-                    console.log(`      searching ${newMeta.pathName}] in existingFilteredMeta having ${filteredMetas.length} items`)
+                havingTagMetas.map(havingTagMeta => {
+                    console.log(`      searching ${havingTagMeta.pathName}] in existingFilteredMeta having ${filteredMetas.length} items`)
                     //search already in filtered
                     let existingFilteredMeta =
                         lodash.find(filteredMetas, function (meta) {
-                            return newMeta.hostName + newMeta.pathName === meta.hostName + meta.pathName
+                            return havingTagMeta.hostName + havingTagMeta.pathName === meta.hostName + meta.pathName
                         })
                     if (existingFilteredMeta !== undefined) {
                         console.log(`      found 1 in filteredMetas: ${existingFilteredMeta.pathName}`)
                         existingFilteredMeta.tags.push(testTag)
                         console.log(`      and added tag to it`)
                     } else {
-                        let newMetaCopy = {
-                            'hostName': newMeta.hostName,
-                            'pathName': newMeta.pathName,
-                            'mimeType': newMeta.mimeType,
-                            'creationDate': new Date(0),
-                            'tags': newMeta.tags,
-                        }
-                        newMetaCopy.tags = [testTag]
+                        let havingTagMetaCopy =  JSON.parse(JSON.stringify(havingTagMeta))
+                        havingTagMetaCopy.creationDate = new Date(0) 
+                        havingTagMetaCopy.tags = [testTag]
                         //add a new object as meta in filtered are "fakes" having only selected tags of the current view
-                        filteredMetas.push(newMetaCopy)
-                        console.log(`      not found in filtered and added new meta ${newMeta.pathName}`)
+                        filteredMetas.push(havingTagMetaCopy)
+                        //console.log(`      not found in filtered and added new meta ${havingTagMetaCopy.pathName}`)
                     }
                 })
             })
@@ -157,8 +159,9 @@ export default class TagUtils {
         )
         
         //COUCHDB: Filter tags not having the "central" character
-        meta.tags = meta.tags.filter(tag => tag.published);
-        Cors.updateMetaInCouchDb(meta)
+        let metaCopy = JSON.parse(JSON.stringify(meta)) as Meta
+        metaCopy.tags = metaCopy.tags.filter(tag => tag.published);
+        CouchDb.updateMetaInCouchDb(metaCopy)
 
         //FINALLY
         this.currentMeta = meta
@@ -184,7 +187,7 @@ export default class TagUtils {
         } else {
             //Central. Use a callback
             TagUtils.callBackFromTagUtilsGetUsedTags = callBackFromTagUtilsGetUsedTags
-            const nothing = Cors.couchDbGetUsedTags(this.callBackFromCouchDbGetUsedTags) as unknown as CouchDbRow[]
+            const nothing = CouchDb.couchDbGetUsedTags(this.callBackFromCouchDbGetUsedTags) as unknown as CouchDbRow[]
             return nothing
         }
 
@@ -195,7 +198,7 @@ export default class TagUtils {
     static callBackFromCouchDbGetUsedTags(tagsFromCouch: CouchDbRow[]) {
         let metaTags = [] as MetaTag[]
         tagsFromCouch.map(row => {
-            const metaTag = ({ tagType: 'NamedTag', value: row.key })
+            const metaTag = ({ tagType: 'NamedTag', value: row.key }) as MetaTag
             metaTags.push(metaTag)
         })
         TagUtils.callBackFromTagUtilsGetUsedTags(metaTags)

@@ -10,7 +10,7 @@ import { DialogStateProps, DialogDispatchProps, DialogButtonClickEvent } from '.
 import { AppState } from '../../../Reducers/reducer';
 import { DIALOGS } from '../../../Actions/actionTypes';
 import { Item } from '../../../Api/Item';
-import TagUtils, { Meta, } from '../../../Api/TagUtils';
+import TagUtils, { Meta, Io} from '../../../Api/TagUtils';
 import AutocompleteTag from './AutocompleteTag'
 import InputLabel from '@material-ui/core/InputLabel';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -20,16 +20,18 @@ import NativeSelect from '@material-ui/core/NativeSelect';
 
 class FormDialog extends Component<EditTagsProps> {
 
-    //Init mandatory as render in invoked on left click on item, even before Edit tag is choosed
+    //Init mandatory as render sn invoked on left click on item, even before Edit tag is choosed
     currentMeta = {} as Meta;
     currentItem = {} as Item;
+
+    //Ref on <Autocomplete>
+    autocompleteTag = {} as AutocompleteTag
 
     constructor(props: EditTagsProps) {
         super(props);
     }
 
     componentDidUpdate() {
-        //item: file (or later folder)
         //currentMeta initialized (see previous) so test in a property
         const itemUrl = new URL(this.currentItem.getUrl())
         console.log(`currentMeta url: ${this.currentMeta.pathName}`)
@@ -40,7 +42,6 @@ class FormDialog extends Component<EditTagsProps> {
             )) {
             this.currentItem = this.props.item as Item
             console.log(`read meta for ${this.currentItem.getUrl()}`)
-            this.currentMeta = {} as Meta
             TagUtils.getOrInitMeta(this.currentItem)
                 .then(response => {
                     this.currentMeta = response;
@@ -48,24 +49,24 @@ class FormDialog extends Component<EditTagsProps> {
         }
     }
 
-    //Just call Redux handleSubmit. Ultimate target is TagUtils.updateMeta
-    //At last reset currentItem as the Dialog is not re-instanciated for next edition
+    //Ultimate target is TagUtils.updateMeta
     handleSave(event: DialogButtonClickEvent) {
         event.preventDefault();
         //this.menu.handleChangeTagList()
-        console.log(this.menu.values)
-        //if (items !== null && items[0] !== undefined) {
+        //console.log(this.autocompleteTag.values)
+        if (this.currentMeta.tags !== null) {
             this.currentMeta.tags = []
-            this.menu.values.map(item => {
+            this.autocompleteTag.values.map((item: Io) => {
                 this.currentMeta.tags.push({
                     'tagType': 'NamedTag',
                     'value': item.value,
                     'published': item.published
                 })
             })
-        //}
+        }
         //TagUtils.updateMeta(this.currentMeta)
         this.props.handleSubmit(event, this.currentMeta);
+        this.setState({item: null})
     }
 
     handleClose = {}
@@ -104,13 +105,11 @@ class FormDialog extends Component<EditTagsProps> {
                                 id="form-dialog-edit">Editing TAGS: {this.currentItem.getDisplayName()}
                             </DialogTitle>
                             <DialogContent
-                                style={{
-                                    overflow: 'visible'
-                                }}
+                                style={{ overflow: 'visible' }}
                             >
                                 <AutocompleteTag
                                     meta={this.currentMeta}
-                                    ref={(menu) => { this.menu = menu }} />
+                                    ref={(autocompleteTag) => { this.autocompleteTag = autocompleteTag }} />
 
                                 {this.currentMeta && this.currentMeta.pathName && this.currentMeta.pathName.split('.').length > 1 ? (
                                     <div><br />
