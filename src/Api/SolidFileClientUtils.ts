@@ -37,13 +37,7 @@ export default class SolidFileClientUtils {
     }
 
     static async fileClientReadFolder(fileName: string) {
-        await this.fileClientPopupLogin('https://okilele.solid.community/')
-
-
-        if (fileName.indexOf('Meta') !== -1) {
-            console.log('found')
-        }
-
+        await this.fileClientPopupLogin(this.getServerId())
         let res = {} as IFolder;
         await FileClient.readFolder(fileName).then((content: IFolder) => {
             content.name = decodeURI(content.name)

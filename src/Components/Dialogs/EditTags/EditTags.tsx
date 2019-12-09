@@ -29,31 +29,51 @@ class FormDialog extends Component<EditTagsProps> {
     }
 
     componentDidUpdate() {
-        //currentMEta initialized (see previous) so test in a property
-        console.log(`currentMeta url: ${this.currentMeta.fileUrl}`)
+        //item: file (or later folder)
+        //currentMeta initialized (see previous) so test in a property
+        const itemUrl = new URL(this.currentItem.getUrl())
+        console.log(`currentMeta url: ${this.currentMeta.pathName}`)
         if (this.props.item
-            && this.currentMeta.fileUrl !== this.currentItem.getUrl()) {
+            && (
+                this.currentMeta.hostName !== itemUrl.hostname
+                || this.currentMeta.pathName !== itemUrl.pathname
+            )) {
             this.currentItem = this.props.item as Item
             console.log(`read meta for ${this.currentItem.getUrl()}`)
+            this.currentMeta = {} as Meta
             TagUtils.getOrInitMeta(this.currentItem)
                 .then(response => {
                     this.currentMeta = response;
                 })
         }
     }
-    //Just call Redux handleSubmit
-    //resset currentItem as the Dialog in not re-instanciated for next edition
+
+    //Just call Redux handleSubmit. Ultimate target is TagUtils.updateMeta
+    //At last reset currentItem as the Dialog is not re-instanciated for next edition
     handleSave(event: DialogButtonClickEvent) {
         event.preventDefault();
+        //this.menu.handleChangeTagList()
+        console.log(this.menu.values)
+        //if (items !== null && items[0] !== undefined) {
+            this.currentMeta.tags = []
+            this.menu.values.map(item => {
+                this.currentMeta.tags.push({
+                    'tagType': 'NamedTag',
+                    'value': item.value,
+                    'published': item.published
+                })
+            })
+        //}
         //TagUtils.updateMeta(this.currentMeta)
         this.props.handleSubmit(event, this.currentMeta);
-        this.currentMeta = {} as Meta
     }
 
     handleClose = {}
+
+    //all changes on fields, filter by name (actually one, mimeType)
     handleChange = (name: string) => (event: React.ChangeEvent<HTMLSelectElement>) => {
-        if (name === 'fileType') this.currentMeta.fileType = event.target.value
-        if (name === 'application') this.currentMeta.application = event.target.value
+        if (name === 'mimeType') this.currentMeta.mimeType = event.target.value
+        this.forceUpdate()
     };
 
     render() {
@@ -90,40 +110,26 @@ class FormDialog extends Component<EditTagsProps> {
                             >
                                 <AutocompleteTag
                                     meta={this.currentMeta}
-                                />
-                                {this.currentMeta.extension !== undefined
-                                    && this.currentMeta.extension !== '' ? (
-                                        <div><br/>
-                                            File has no extension, enter file type:&nbsp;
+                                    ref={(menu) => { this.menu = menu }} />
+
+                                {this.currentMeta && this.currentMeta.pathName && this.currentMeta.pathName.split('.').length > 1 ? (
+                                    <div><br />
+                                        File has no extension, enter file type:&nbsp;
                                             <FormControl>
-                                                <Select
-                                                    native
-                                                    value={this.currentMeta.fileType}
-                                                    onChange={this.handleChange('fileType')}
-                                                >
-                                                    <option value="" />
-                                                    <option value={'text-plain'}>text-plain</option>
-                                                    <option value={'multipart/mixed'}>mixed</option>
-                                                    <option value={'image/jpeg}'}>image</option>
-                                                </Select>
-                                            </FormControl>
-                                        </div>
-                                    ) : null}
-                                <br />
-                                Used by application:&nbsp;
-                                <FormControl>
-                                    <Select
-                                        native
-                                        value={this.currentMeta.application}
-                                        onChange={this.handleChange('application')}
 
-                                    >
-                                        <option value="" />
-                                        <option value={"Solidagram"}>Solidagram</option>
-                                        <option value={"fb"}>Solid-fb</option>
-
-                                    </Select>
-                                </FormControl>
+                                            <Select
+                                                native
+                                                value={this.currentMeta.mimeType}
+                                                onChange={this.handleChange('mimeType')}
+                                            >
+                                                <option value="" />
+                                                <option value={'text-plain'}>text-plain</option>
+                                                <option value={'multipart/mixed'}>mixed</option>
+                                                <option value={'image/jpeg}'}>image</option>
+                                            </Select>
+                                        </FormControl>
+                                    </div>
+                                ) : null}
                             </DialogContent>
                             <DialogActions>
                                 <Button onClick={handleClose} color="primary" type="button">

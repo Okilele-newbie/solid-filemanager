@@ -14,7 +14,7 @@ class MetaList extends Component<MetaListProps> {
         const { metas, isLoading } = this.props;
         const itemComponents = metas.map((meta, key) => {
             return <MetaRow 
-                key ={meta.fileUrl}
+                key ={meta.hostName + meta.pathName}
                 meta={meta}  />;
         });
 
@@ -35,7 +35,7 @@ interface MetaListProps extends StateProps {};
 
 const mapStateToProps = (state: AppState): StateProps => {
     const metas = state.metas.inCurFolder
-        .filter(meta => filterMatch(meta.fileUrl, state.metas.filter));
+        .filter(meta => filterMatch(meta.hostName + meta.pathName, state.metas.filter));
 
     return {
         metas,

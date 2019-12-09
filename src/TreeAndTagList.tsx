@@ -36,12 +36,12 @@ export default class TreeAndTagList extends Component<{}, State> {
                 Tree
                 {this.state.showTreeOrTag ?
                     <div className='bodyPlace'>
-                        <TreeView />
+                        <div className='leftView'><TreeView /></div>
                         <FileList />
                     </div>
                     :
                     <div className='bodyPlace'>
-                        <TagList />
+                        <div className='leftView'><TagList /></div>
                         <MetaList />
                     </div>
                 }

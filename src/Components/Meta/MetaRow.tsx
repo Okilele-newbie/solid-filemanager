@@ -50,7 +50,7 @@ class MetaRow extends Component<MetaProps> {
             <div className="File" data-selected={isSelected}>
                 <MyListItem>
                     <MyListItemText className="metaname"
-                        primary={meta.fileUrl.split(('\/'))[meta.fileUrl.split(('\/')).length - 1].concat(tagList)}
+                        primary={meta.pathName.concat(tagList)}
                         onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu}
                     />
                 </MyListItem>
@@ -82,7 +82,7 @@ const mapStateToProps = (state: AppState, ownProps: MetaOwnProps): StateProps =>
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: MetaOwnProps): DispatchProps => {
     const meta = ownProps.meta;
-    const item = new Item(meta.fileUrl, 0);
+    const item = new Item('https://' + meta.hostName + meta.pathName);
 
     return {
 

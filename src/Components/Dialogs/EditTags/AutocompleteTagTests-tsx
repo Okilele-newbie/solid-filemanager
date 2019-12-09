@@ -1,0 +1,168 @@
+import React, { useState } from 'react';
+import { Meta, MetaTag } from '../../../Api/TagUtils';
+import CreatableSelect from 'react-select/creatable';
+import CallJsonP from '../../../Api/jsonp';
+//===================================================
+
+import chroma from 'chroma-js';
+
+import { colourOptions } from './data';
+
+const colourStyles = {
+  control: styles => ({ ...styles, backgroundColor: 'white' }),
+  option: (styles, { data, isDisabled, isFocused, isSelected }) => {
+    const color = chroma(data.color);
+    return {
+      ...styles,
+      backgroundColor: isDisabled
+        ? null
+        : isSelected
+        ? data.color
+        : isFocused
+        ? color.alpha(0.1).css()
+        : null,
+      color: isDisabled
+        ? '#ccc'
+        : isSelected
+        ? chroma.contrast(color, 'white') > 2
+          ? 'white'
+          : 'black'
+        : data.color,
+      cursor: isDisabled ? 'not-allowed' : 'default',
+
+      ':active': {
+        ...styles[':active'],
+        backgroundColor: !isDisabled && (isSelected ? data.color : color.alpha(0.3).css()),
+      },
+    };
+  },
+  multiValue: (styles, { data }) => {
+    //const color = chroma(data.color);
+    /*
+    return {
+      ...styles,
+      backgroundColor: 'green'//color.alpha(0.1).css(),
+    };
+    */
+       return {
+      ...styles,
+      backgroundColor: isDisabled
+        ? null
+        : isSelected
+        ? data.color
+        : isFocused
+        ? color.alpha(0.1).css()
+        : null,
+      color: isFocused
+        ? '#ccc'
+        : isSelected
+        ? 'pink'
+          ? 'white'
+          : 'black'
+        : 'yellow',
+      cursor: isDisabled ? 'not-allowed' : 'default',
+
+      ':active': {
+        ...styles[':active'],
+        backgroundColor: !isDisabled && (isSelected ? data.color : color.alpha(0.3).css()),
+      },
+    };
+  },
+  multiValueLabel: (styles, { data }) => ({
+    ...styles,
+    color: data.color,
+  }),
+  multiValueRemove: (styles, { data }) => ({
+    ...styles,
+    color: data.color,
+    ':hover': {
+      backgroundColor: data.color,
+      color: 'white',
+    },
+  }),
+};
+
+//====================================
+
+interface PopupProps {
+    meta: Meta
+}
+//Io: to handle data from JsonP
+interface PopupState {
+    suggests: Io[]
+}
+
+interface Io {
+    label: string,
+    value: string
+    color: string
+}
+
+export default class AutocompleteTag extends React.Component<PopupProps, PopupState> {
+    constructor(props: PopupProps) {
+        super(props);
+        this.state = {
+            suggests: []
+        };
+    }
+
+    values = [] as Io[];
+    render() {
+        this.values = []
+        if (this.props.meta.tags !== undefined) {
+            this.props.meta.tags.map(tag => {
+                this.values.push({ 'label': tag.value, 'value': tag.value })
+            })
+        }
+        return (
+            <CreatableSelect
+                className='react-select-container'
+                classNamePrefix="react-select"
+                options={this.state.suggests}
+                value={this.values}
+                defaultValue={[colourOptions[0], colourOptions[1]]}
+                isMulti
+                options={colourOptions}
+                styles={colourStyles}
+                onChange={this.handleSelect.bind(this)}
+                onInputChange={this.handleChange.bind(this)}
+                textFieldProps={{
+                    InputLabelProps: {
+                        shrink: true
+                    }
+                }}
+                {...{ ...this.props }}
+            />
+        )
+    }
+
+    //select/delete a tag
+    handleSelect(tags: Io[]) {
+        //tags : all tags
+        //console.log(tags)
+        if (tags !== null && tags[0] !== undefined) {
+            this.props.meta.tags = []
+            tags.map(tag => {
+                this.props.meta.tags.push({ 'tagType': 'NamedTag', 'value': tag.value })
+            })
+        }
+        this.forceUpdate()
+    }
+
+    //type a letter
+    handleChange(str: string) {
+        if (str !== "") {
+            //"suggests: any[]) => {..." this is call back param for GetSuggestions, 
+            //will be run vhen back
+            CallJsonP((suggests: any[]) => {
+                let retVal = [] as Io[]
+                suggests[1].map((item: string) => {
+                    let o: Io = { 'label': item, 'value': item, color: 'red' }
+                    retVal.push(o)
+                })
+                this.setState({ suggests: retVal })
+            }
+                , str);
+        }
+    }
+}
