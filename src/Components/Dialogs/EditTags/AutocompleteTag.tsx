@@ -1,29 +1,26 @@
 import React from 'react';
-import { Meta, Io } from '../../../Api/TagUtils';
+import { Meta, onServerColor } from '../../../Api/TagUtils';
 import CreatableSelect from 'react-select/creatable';
 import CallJsonP from '../../../Api/jsonp';
 
-interface PopupProps {
-    meta: Meta
+//Autocomplete.values schema
+export interface Io {
+    label: string,
+    value: string,
+    published: boolean
 }
+
+interface PopupProps { meta: Meta }
 //Io: to handle data from JsonP
-interface PopupState {
-    suggests: Io[]
-}
+interface PopupState { suggests: Io[]}
 
 interface MultiValueLabelProps {
     children: {}
     data: Io
 }
 
+//Each tag as Io in Autocomplete componennt
 class MultiValueLabel extends React.Component<MultiValueLabelProps> {
-    red = {
-        color: "red"
-    };
-
-    black = {
-        color: "black"
-    };
 
     tagHandleClick() {
         this.props.data.published = !this.props.data.published
@@ -31,13 +28,9 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
     }
 
     render() {
-        const {
-            children,
-            data,
-        } = this.props;
-
+        const { children, data } = this.props;
         const styles = {
-            color: data.published ? 'red' : 'black'
+            color: data.published ? onServerColor : 'black'
         };
 
         return (
@@ -46,11 +39,9 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
                 onClick={this.tagHandleClick.bind(this)}>
                 {children}
             </div>
-
         )
     }
 }
-
 
 export default class AutocompleteTag extends React.Component<PopupProps, PopupState> {
 

@@ -10,13 +10,10 @@ import { DialogStateProps, DialogDispatchProps, DialogButtonClickEvent } from '.
 import { AppState } from '../../../Reducers/reducer';
 import { DIALOGS } from '../../../Actions/actionTypes';
 import { Item } from '../../../Api/Item';
-import TagUtils, { Meta, Io} from '../../../Api/TagUtils';
-import AutocompleteTag from './AutocompleteTag'
-import InputLabel from '@material-ui/core/InputLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
+import TagUtils, { Meta } from '../../../Api/TagUtils';
+import AutocompleteTag, { Io } from './AutocompleteTag'
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
-import NativeSelect from '@material-ui/core/NativeSelect';
 
 class FormDialog extends Component<EditTagsProps> {
 
@@ -52,8 +49,7 @@ class FormDialog extends Component<EditTagsProps> {
     //Ultimate target is TagUtils.updateMeta
     handleSave(event: DialogButtonClickEvent) {
         event.preventDefault();
-        //this.menu.handleChangeTagList()
-        //console.log(this.autocompleteTag.values)
+        //Get data from Autocomplete component
         if (this.currentMeta.tags !== null) {
             this.currentMeta.tags = []
             this.autocompleteTag.values.map((item: Io) => {

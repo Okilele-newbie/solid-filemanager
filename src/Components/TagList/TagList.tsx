@@ -6,10 +6,11 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { styled } from '@material-ui/styles';
 import Checkbox from '@material-ui/core/Checkbox';
-import Switch from '@material-ui/core/Switch';
+import AntSwitch from '@material-ui/core/Switch';
 
 import { getMetaList, MyDispatch } from '../../Actions/Actions';
-import TagUtils, { MetaTag } from '../../Api/TagUtils'
+import TagUtils, { MetaTag, onServerColor } from '../../Api/TagUtils'
+import lodash from 'lodash'
 
 const MyList = styled(List)({
     minWidth: 'max-content'
@@ -21,7 +22,7 @@ const MyListItem = styled(ListItem)({
 
 const MyListItemText = styled(ListItemText)({
     fontSize: '0.9em',
-    padding: '0 0 0 0'
+    padding: '0 0 0 0',
 });
 
 
@@ -30,39 +31,55 @@ const MyCheckbox = styled(Checkbox)({
 });
 
 export class TagList extends Component<TagListProps> {
-    constructor(props: any) {
-        super(props)
-        this.callBackFromTagUtilsGetUsedTags = this.callBackFromTagUtilsGetUsedTags.bind(this)
-    }
 
     state = {
         loading: true,
-        localOrCentral: true //true => local
     };
+
+    sources = {
+        local: true,
+        central: false
+    };
+
     usedTags = [] as MetaTag[]
     selectedTags = [] as MetaTag[]
-    localOrCentral = true as boolean
-
 
     componentDidMount() {
         this.refreshView()
     }
 
     refreshView() {
-        this.setState({ loading: true })
-        TagUtils.getUsedTags(this.localOrCentral, this.callBackFromTagUtilsGetUsedTags)
-            //for tags from local
-            .then(foundTags => {
-                this.usedTags = foundTags as MetaTag[];
-                if (this.localOrCentral) this.setState({ loading: false })
-            })
+        console.log('2 ' + this.state)
+        let count = 0
+        this.usedTags = [] as MetaTag[]
+        if (this.sources.local) {
+            count--
+            TagUtils.getLocalUsedTags(this.sources.central)
+                .then(foundTags => {
+                    this.usedTags.push(...foundTags as MetaTag[]);
+                    count++
+                    if (count === 0) {
+                        this.setState({ loading: false })
+                    }
+                })
+        }
+
+        if (this.sources.central) {
+            count--
+            TagUtils.getCentralUsedTags()
+                .then(foundTags => {
+                    if (foundTags !== undefined) {
+                        this.usedTags.push(...foundTags as MetaTag[]);
+                        count++
+                        if (count === 0) {
+                            this.setState({ loading: false })
+                        }
+                    }
+                })
+        }
     }
 
-    callBackFromTagUtilsGetUsedTags(foundTags: MetaTag[]) {
-        this.usedTags = foundTags
-        this.setState({ loading: false })
-    }
-
+    //check a tag to get associated files
     handleCheck(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
         //event.preventDefault();
         const i: number = this.selectedTags.indexOf(metaTag)
@@ -72,35 +89,47 @@ export class TagList extends Component<TagListProps> {
         this.props.handleSubmit(this.selectedTags);
     }
 
-    onChange() {
-        this.localOrCentral = !this.localOrCentral;
+    handleChange = (name: string) => (event: React.ChangeEvent<HTMLInputElement>): void => {
+        this.sources = ({ ...this.sources, [name]: event.target.checked });
+        this.setState({checkedLocal: true})
+        this.setState({ loading: true })
         this.refreshView()
-    }
+    };
 
     render() {
-        console.log(this.usedTags)
-
+        //console.log(this.usedTags)
         return (
-            this.state.loading ? "Loading ..." : this.PrintList()
+            <div>
+                Local
+                <AntSwitch
+                    checked={this.sources.local}
+                    onChange={this.handleChange('local')}
+                    value="checkedL"
+                    color="primary"
+                />
+                <br/>
+                Central
+                <AntSwitch
+                    checked={this.sources.central}
+                    onChange={this.handleChange('central')}
+                    value="checkedC"
+                    color="primary"
+                />
+                {this.state.loading ? "Loading ..." : this.PrintList()}
+            </div>
         )
+
     };
 
     PrintList = () => {
-        return (
-            <div>
-                Tags origin: Local&nbsp;
-            <Switch
-                    checked={this.state.localOrCentral}
-                    onChange={() => { this.onChange() }}
-                    value="Tree"
-                    color="default"
-                />
-                Central
-            <MyList
-                    className='leftPane'>
+        if (!this.state.loading) {
+            this.usedTags = lodash.sortBy(this.usedTags, ['tagType', 'value']);
+            return (
+                < MyList className='leftPane' >
                     {this.usedTags.map(tag => {
-                        //const key = `${tag.tagType}-${tag.value}`
-                        //const labelId = `checkbox-list-label-${key}`;
+                        const itemColor = {
+                            color: tag.published ? onServerColor : 'black'
+                        };
                         return (
                             <MyListItem
                                 key={tag.value}
@@ -111,18 +140,18 @@ export class TagList extends Component<TagListProps> {
                                     color="primary"
                                     onChange={e => this.handleCheck(tag, e)}
                                 />
-                                <MyListItemText
-                                    id={tag.value}
-                                >
-                                    {`${tag.value}`}
-
+                                <MyListItemText id={tag.value} >
+                                    <span style={itemColor}>{`${tag.value}`}</span>
                                 </MyListItemText>
                             </MyListItem>
                         )
-                    })}
-                </MyList>
-            </div>
-        )
+                    })
+                    }
+                </MyList >
+            )
+        }
+        console.log('8 ' + this.state)
+
     }
 }
 

@@ -1,21 +1,15 @@
 import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
 import { Item } from './Item';
-import CouchDb, {CouchDbRow} from './CouchDb';
+import CouchDb, { CouchDbRow } from './CouchDb';
 
 const tagDir = '/public'
 const tagFileName = '_Meta7.json'
+export const onServerColor = 'mediumspringgreen'
 
 //Same as Tag without description for Meta
 export interface MetaTag {
     tagType: string,
-    value: string,
-    published: boolean
-}
-
-//MetaTags in autocomplete component and EditTag
-export interface Io {
-    label: string,
     value: string,
     published: boolean
 }
@@ -35,7 +29,7 @@ export default class TagUtils {
         TagUtils.callBackFromCouchDbGetUsedTags = TagUtils.callBackFromCouchDbGetUsedTags.bind(this)
     }
 
-    static allMetas = [] as Meta[];
+    static allLocalMetas = [] as Meta[];
     static currentMeta = {} as Meta;
     static currentItem = {} as Item
 
@@ -43,73 +37,56 @@ export default class TagUtils {
         return `${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`
     }
 
+    //Local storage, read the file and get all metas in it
     static async getAllMetas() {
         let allMetas = [] as Meta[]
-        if (this.allMetas.length !== 0) allMetas = this.allMetas
+        if (this.allLocalMetas.length !== 0) allMetas = this.allLocalMetas
         else {
             var json: string = await SolidFileClientUtils.fileClientReadFileAsString(TagUtils.getTagIndexFullPath())
             //console.log(`json for allTags=>>${json}<<`)
-            if (json === '') {
-                SolidFileClientUtils.fileClientcreateFile(TagUtils.getTagIndexFullPath())
-            } else {
-                allMetas = JSON.parse(json)
-            }
+            if (json === '') SolidFileClientUtils.fileClientcreateFile(TagUtils.getTagIndexFullPath())
+            else allMetas = JSON.parse(json)
             //console.log(`Found ${allTags.length} tags all items`)
-            this.allMetas = allMetas
+            this.allLocalMetas = allMetas
         }
-        return allMetas as unknown as Meta[]
+        return allMetas
     }
 
-    static filterByValue(metas: Meta[], string: string) {
-        return metas.filter(
-            (meta: Meta) => Object.keys(meta.tags).some(tag => tag === string)
-        );
-    }
-
-    //List of selected tags
-    static async getMetaList(selectedTags: MetaTag[]) {
+    // ============================================================= GET METAS FROM LOCAL AND CENTRAL
+    //List of selected tags from Local (file) repo
+    static async getLocalMetaList(selectedTags: MetaTag[]) {
         const allMetas = await this.getAllMetas() as unknown as Meta[]
         let filteredMetas = [] as Meta[]
         //Create a list of copies of metas filtered by view selection and only wearing selected tags
         if (false) {
-            //Filter: AND
-            //let filteredMetas = allMetas
-            //selectedTags.map(testTag => {
-            //    filteredMetas = filteredMetas.filter(({ meta: Meta }) => meta.tags.includes(testTag))
-            //})
+            //Filter: AND: ToDo
         } else {
             //Filter: OR   
             selectedTags.map((testTag) => {
-                //get new metas for testTag and reset its tags to testTag
-                console.log(`working on ${testTag.value}`)
+                //get metas for testTag and reset tags to testTag
                 let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
-                console.log(`  found ${havingTagMetas.length} in allMeta`)
                 havingTagMetas.map(havingTagMeta => {
-                    console.log(`      searching ${havingTagMeta.pathName}] in existingFilteredMeta having ${filteredMetas.length} items`)
-                    //search already in filtered
+                    //search already in filtered to add or update list
                     let existingFilteredMeta =
                         lodash.find(filteredMetas, function (meta) {
                             return havingTagMeta.hostName + havingTagMeta.pathName === meta.hostName + meta.pathName
                         })
                     if (existingFilteredMeta !== undefined) {
-                        console.log(`      found 1 in filteredMetas: ${existingFilteredMeta.pathName}`)
                         existingFilteredMeta.tags.push(testTag)
-                        console.log(`      and added tag to it`)
                     } else {
-                        let havingTagMetaCopy =  JSON.parse(JSON.stringify(havingTagMeta))
-                        havingTagMetaCopy.creationDate = new Date(0) 
+                        //filteredMetas: "fakes" Meta having only selected tags of the current view
+                        let havingTagMetaCopy = JSON.parse(JSON.stringify(havingTagMeta))
+                        havingTagMetaCopy.creationDate = new Date(0)
                         havingTagMetaCopy.tags = [testTag]
-                        //add a new object as meta in filtered are "fakes" having only selected tags of the current view
                         filteredMetas.push(havingTagMetaCopy)
-                        //console.log(`      not found in filtered and added new meta ${havingTagMetaCopy.pathName}`)
                     }
                 })
             })
         }
-        lodash.sortBy(filteredMetas, 'value')
         return filteredMetas
     }
 
+    //getLocalMetaList() helper
     static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
         return lodash.filter(metas, function (meta) {
             return lodash.some(meta.tags, function (tag) {
@@ -117,6 +94,25 @@ export default class TagUtils {
             });
         });
     }
+
+    /* work in progress
+    static async getCentralMetaList(selectedTags: MetaTag[]) {
+        let filteredMetas = [] as Meta[]
+        //Create a list of copies of metas filtered by view selection and only wearing selected tags
+        if (false) {
+            //Filter: AND: ToDo
+        } else {
+            //Filter: OR   
+            selectedTags.map((testTag) => {
+                CouchDb.getMeta
+            })
+        }
+        lodash.sortBy(filteredMetas, 'value')
+        return filteredMetas
+    }
+    */
+
+    // ============================================================= END
 
     //Get the meta of an item
     static async getOrInitMeta(item: Item) {
@@ -150,60 +146,65 @@ export default class TagUtils {
 
     static async updateMeta(meta: Meta) {
         //FILE: remove old meta from list if exists and add the new one
-        let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
-        allMetas = allMetas.filter(el => !(el.hostName === meta.hostName && el.pathName === meta.pathName));
-        allMetas.push(meta)
+        let allLocalMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
+        allLocalMetas = allLocalMetas.filter(el => !(el.hostName === meta.hostName && el.pathName === meta.pathName));
+        allLocalMetas.push(meta)
         SolidFileClientUtils.fileClientupdateFile(
             TagUtils.getTagIndexFullPath(),
-            JSON.stringify(allMetas)
+            JSON.stringify(allLocalMetas)
         )
-        
-        //COUCHDB: Filter tags not having the "central" character
+
+        //COUCHDB:
         let metaCopy = JSON.parse(JSON.stringify(meta)) as Meta
         metaCopy.tags = metaCopy.tags.filter(tag => tag.published);
-        CouchDb.updateMetaInCouchDb(metaCopy)
+        metaCopy.tags.forEach(function (tag) { delete tag.published });
+        CouchDb.updateMeta(metaCopy)
 
         //FINALLY
         this.currentMeta = meta
-        this.allMetas = allMetas
+        this.allLocalMetas = allLocalMetas
     }
 
-    static async getUsedTags(localOrCentral: boolean, callBackFromTagUtilsGetUsedTags: {}) {
+    static async getLocalUsedTags(alsoSearchOnCentral: boolean) {
         let usedTag = [] as MetaTag[]
-        if (localOrCentral) {
-                    //Local
-            let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
-            //get list of tags in meta
-            let foundTags = [] as MetaTag[]
-            allMetas.map(meta => {
-                foundTags.push(...meta.tags)
-            })
-            //returnTags = lodash.uniqBy(foundTags, 'value');
-            usedTag = lodash.uniqWith(foundTags, function (first, second) {
-                return first.tagType === second.tagType && first.value === second.value
-            });
-            usedTag = lodash.sortBy(usedTag, ['tagType', 'value']);
-            return usedTag
-        } else {
-            //Central. Use a callback
-            TagUtils.callBackFromTagUtilsGetUsedTags = callBackFromTagUtilsGetUsedTags
-            const nothing = CouchDb.couchDbGetUsedTags(this.callBackFromCouchDbGetUsedTags) as unknown as CouchDbRow[]
-            return nothing
-        }
 
-    }
-    static callBackFromTagUtilsGetUsedTags: {};
-
-    //static callBackFromTagUtilsGetUsedTags: (MetaTag[])
-    static callBackFromCouchDbGetUsedTags(tagsFromCouch: CouchDbRow[]) {
-        let metaTags = [] as MetaTag[]
-        tagsFromCouch.map(row => {
-            const metaTag = ({ tagType: 'NamedTag', value: row.key }) as MetaTag
-            metaTags.push(metaTag)
+        let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
+        //get list of tags in meta
+        let foundTags = [] as MetaTag[]
+        allMetas.map(meta => {
+            //if alsoSearchOnCentral don't get published tags 
+            if (!alsoSearchOnCentral) foundTags.push(...meta.tags)
+            else {
+                meta.tags.map(tag => {
+                    if (!tag.published) foundTags.push(tag)
+                })
+            }
         })
-        TagUtils.callBackFromTagUtilsGetUsedTags(metaTags)
+        usedTag = lodash.uniqWith(foundTags, function (first, second) {
+            return first.tagType === second.tagType && first.value === second.value
+        });
+        usedTag = lodash.sortBy(usedTag, ['tagType', 'value']);
+        //published prop of tags temporarly used as "coming from server?"
+        //usedTag.forEach(tag => tag.published = false)
+        return usedTag
     }
+
+    static async getCentralUsedTags(): Promise<Array<any>> {
+        return new Promise((resolve, reject) => {
+            CouchDb.getItemsByView(CouchDb.viewNames.GroupedTags, '')
+                .then(
+                    (usedTag: MetaTag[]) => {
+                        //published prop temporarly used as "coming from server?"
+                        usedTag.forEach(tag => tag.published = true)
+                        resolve(usedTag)
+                    }
+                )
+        })
+
+    }
+
 }
+
 
 
 
