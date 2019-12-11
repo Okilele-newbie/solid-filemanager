@@ -1,25 +1,33 @@
 import React from 'react';
-import { Meta, onServerColor } from '../../../Api/TagUtils';
-import CreatableSelect from 'react-select/creatable';
+import TagUtils, { Meta, MetaTag, onServerColor } from '../../../Api/TagUtils';
+import CreatableSelect, { Optionx } from 'react-select/creatable';
 import CallJsonP from '../../../Api/jsonp';
-
-//Autocomplete.values schema
-export interface Io {
-    label: string,
-    value: string,
-    published: boolean
-}
+import Button from '@material-ui/core/Button';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import './Autocomplete.css'
 
 interface PopupProps { meta: Meta }
-//Io: to handle data from JsonP
-interface PopupState { suggests: Io[]}
 
-interface MultiValueLabelProps {
-    children: {}
-    data: Io
+interface PopupState {
+    suggests: Suggestion[]
 }
 
-//Each tag as Io in Autocomplete componennt
+interface MultiValueLabelProps {
+    children: {},
+    data: MetaTag
+}
+
+interface Suggestion {
+    source: string
+    label: string,
+    value: string,
+}
+//Each tag as is a MultiValueLabel in Autocomplete componennt
 class MultiValueLabel extends React.Component<MultiValueLabelProps> {
 
     tagHandleClick() {
@@ -28,7 +36,7 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
     }
 
     render() {
-        const { children, data } = this.props;
+        const { data } = this.props;
         const styles = {
             color: data.published ? onServerColor : 'black'
         };
@@ -37,86 +45,133 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
             <div id={data.value}
                 style={styles}
                 onClick={this.tagHandleClick.bind(this)}>
-                {children}
+                {data.value}
             </div>
         )
     }
+}
+
+//class Option extends React.Component<MultiValueLabelProps> {
+class OptionDisabled extends React.Component {
+    render() {
+        const { data } = this.props;
+
+        const styles = {
+            color: data.source === 'google' ? 'blue' : data.source === 'local' ? 'black' : onServerColor,
+            align: 'left',
+            textTransform: 'none',
+            display: 'flex',
+            justifyContent: 'left',
+            padding: '3px 0px 3px 15px',
+        };
+
+        return (
+            <div>
+                <Button style={styles} size="small" fullWidth={true} className='Button'>
+                    {data.value}
+                </Button >
+            </div>
+        )
+    }
+
 }
 
 export default class AutocompleteTag extends React.Component<PopupProps, PopupState> {
 
     constructor(props: PopupProps) {
         super(props);
-        this.state = {
-            suggests: []
-        };
+        this.state = { suggests: [] };
     }
 
-    values = [] as Io[];
-    render() {
-        this.values = []
-        if (this.props.meta.tags !== undefined) {
-            this.props.meta.tags.map(tag => {
-                this.values.push({
-                    'label': tag.value,
-                    'value': tag.value,
-                    'published': tag.published
-                })
-            })
-        }
-        return (
-            <CreatableSelect
-                components={{ MultiValueLabel }}
-                className='react-select-container'
-                classNamePrefix="react-select"
-                options={this.state.suggests}
-                value={this.values}
-                isMulti
-                onChange={this.handleChangeTagList.bind(this)}
-                onInputChange={this.handleChange.bind(this)}
-                textFieldProps={{
-                    InputLabelProps: {
-                        shrink: true
-                    }
-                }}
-                {...{ ...this.props }}
-            />
+    source = '' as string
 
+    handleRadioChange = event => {
+        this.source = event.target.value
+        this.handleChange('')
+    };
+
+    render() {
+        return (
+            <div class='bodyPlace'>
+                <div class='leftPlace'>
+                    <RadioGroup aria-label="gender" onChange={this.handleRadioChange}>
+                        <FormControlLabel value="local" control={<Radio color="primary" />} label="Local" labelPlacement="start" />
+                        <FormControlLabel value="central" control={<Radio color="primary" />} label="Central" labelPlacement="start" />
+                        <FormControlLabel value="google" control={<Radio color="primary" />} label="Google" labelPlacement="start" />
+                    </RadioGroup>
+                </div>
+                <div>
+                    <CreatableSelect
+                        components={{ MultiValueLabel }}
+                        options={this.state.suggests}
+                        value={this.props.meta.tags}
+                        isMulti
+                        onChange={this.handleChangeTagList.bind(this)}
+                        onInputChange={this.handleChange.bind(this)}
+                        textFieldProps={{
+                            InputLabelProps: {
+                                shrink: true
+                            }
+                        }}
+                        {...{ ...this.props }}
+                    />
+                </div>
+            </div>
         )
     }
 
-    //select/delete a tag on screen: update the list of tags of the current meta
-    //which was set is in its props by EditTag
-    //items: all tags on screen
-    handleChangeTagList(items: Io[]) {
+    //select a suggestion or delete a tag: items is the list of current selected values
+    handleChangeTagList(items: Suggestion[]) {
         if (items !== null && items[0] !== undefined) {
             this.props.meta.tags = []
             items.map(item => {
-                this.props.meta.tags.push({
-                    'tagType': 'NamedTag',
-                    'value': item.value,
-                    'published': item.published
-                })
+                const tag: MetaTag = { 'tagType': 'NamedTag', 'value': item.value, published: false }
+                this.props.meta.tags.push(tag)
             })
         }
         this.forceUpdate()
     }
 
-    //type a letter
+    //type a letter, items in suggestions are Metatag
     handleChange(str: string) {
         if (str !== "") {
-            //"suggests: any[]) => {..." callback CallJsonP will run when done 
 
-            CallJsonP((suggests: any[]) => {
-                let retVal = [] as Io[]
-                //suggests[1] creates a new Io
-                suggests[1].map((item: string) => {
-                    let o: Io = { 'label': item, 'value': item, 'published': false }
-                    retVal.push(o)
-                })
-                this.setState({ suggests: retVal })
+            let retVal = [] as Suggestion[]
+            if (this.source === 'google') {
+                CallJsonP((suggests: any[]) => {
+                    //suggests[1] creates a new Io
+                    suggests[1].map((item: string) => {
+                        const suggestion: Suggestion = { 'label': item, 'value': item, 'source': 'google' }
+                        retVal.push(suggestion)
+                    })
+                    this.setState({ suggests: retVal })
+                }
+                    , str);
             }
-                , str);
+
+            if (this.source === 'local') {
+                let localTags = [] as MetaTag[]
+                TagUtils.getLocalUsedTags(true)
+                    .then((foundTags: MetaTag[]) => {
+                        foundTags.map(tag => {
+                            const suggestion: Suggestion = { 'label': tag.value, 'value': tag.value, 'source': 'local' }
+                            retVal.push(suggestion);
+                        })
+                        this.setState({ suggests: retVal })
+                    })
+            }
+
+            if (this.source === 'central') {
+                let serverTags = [] as MetaTag[]
+                TagUtils.getCentralUsedTags()
+                    .then((foundTags: MetaTag[]) => {
+                        foundTags.map(tag => {
+                            const suggestion: Suggestion = { 'label': tag.value, 'value': tag.value, 'source': 'central' }
+                            retVal.push(suggestion);
+                        })
+                        this.setState({ suggests: retVal })
+                    })
+            }
         }
     }
 }

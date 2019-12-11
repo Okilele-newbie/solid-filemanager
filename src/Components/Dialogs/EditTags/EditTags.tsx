@@ -10,8 +10,8 @@ import { DialogStateProps, DialogDispatchProps, DialogButtonClickEvent } from '.
 import { AppState } from '../../../Reducers/reducer';
 import { DIALOGS } from '../../../Actions/actionTypes';
 import { Item } from '../../../Api/Item';
-import TagUtils, { Meta } from '../../../Api/TagUtils';
-import AutocompleteTag, { Io } from './AutocompleteTag'
+import TagUtils, { Meta, MetaTag } from '../../../Api/TagUtils';
+import AutocompleteTag from './AutocompleteTag'
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
@@ -29,7 +29,6 @@ class FormDialog extends Component<EditTagsProps> {
     }
 
     componentDidUpdate() {
-        //currentMeta initialized (see previous) so test in a property
         const itemUrl = new URL(this.currentItem.getUrl())
         console.log(`currentMeta url: ${this.currentMeta.pathName}`)
         if (this.props.item
@@ -52,7 +51,7 @@ class FormDialog extends Component<EditTagsProps> {
         //Get data from Autocomplete component
         if (this.currentMeta.tags !== null) {
             this.currentMeta.tags = []
-            this.autocompleteTag.values.map((item: Io) => {
+            this.autocompleteTag.values.map((item: MetaTag) => {
                 this.currentMeta.tags.push({
                     'tagType': 'NamedTag',
                     'value': item.value,
@@ -67,7 +66,7 @@ class FormDialog extends Component<EditTagsProps> {
 
     handleClose = {}
 
-    //all changes on fields, filter by name (actually one, mimeType)
+    //changes on mimeType
     handleChange = (name: string) => (event: React.ChangeEvent<HTMLSelectElement>) => {
         if (name === 'mimeType') this.currentMeta.mimeType = event.target.value
         this.forceUpdate()

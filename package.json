@@ -50,6 +50,7 @@
     "redux-thunk": "~2.3.0",
     "solid-auth-client": "^2.3.0",
     "solid-file-client": "^0.5.2",
+    "styled-components": "^4.4.1",
     "typeface-roboto": "0.0.54",
     "typescript": "^3.4.4"
   },

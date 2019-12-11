@@ -49,7 +49,6 @@ export class TagList extends Component<TagListProps> {
     }
 
     refreshView() {
-        console.log('2 ' + this.state)
         let count = 0
         this.usedTags = [] as MetaTag[]
         if (this.sources.local) {
@@ -79,7 +78,7 @@ export class TagList extends Component<TagListProps> {
         }
     }
 
-    //check a tag to get associated files
+    //check or click a tag to get associated files
     handleCheck(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
         //event.preventDefault();
         const i: number = this.selectedTags.indexOf(metaTag)
@@ -88,7 +87,17 @@ export class TagList extends Component<TagListProps> {
             : this.selectedTags.push(metaTag)
         this.props.handleSubmit(this.selectedTags);
     }
+    handleClick(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
+        //event.preventDefault();
+        const i: number = this.selectedTags.indexOf(metaTag)
+        i !== -1
+            ? this.selectedTags.splice(i, 1)
+            : this.selectedTags.push(metaTag)
+        this.props.handleSubmit(this.selectedTags);
+        this.forceUpdate() //CheckBox update
+    }
 
+    //local/central
     handleChange = (name: string) => (event: React.ChangeEvent<HTMLInputElement>): void => {
         this.sources = ({ ...this.sources, [name]: event.target.checked });
         this.setState({checkedLocal: true})
@@ -139,8 +148,11 @@ export class TagList extends Component<TagListProps> {
                                 <MyCheckbox
                                     color="primary"
                                     onChange={e => this.handleCheck(tag, e)}
+                                    checked = {this.selectedTags.find(elt => tag === elt) !== undefined}
                                 />
-                                <MyListItemText id={tag.value} >
+                                <MyListItemText 
+                                    id={tag.value} 
+                                    onClick={e => this.handleClick(tag, e)}>
                                     <span style={itemColor}>{`${tag.value}`}</span>
                                 </MyListItemText>
                             </MyListItem>

@@ -25,10 +25,6 @@ export interface Meta {
 
 export default class TagUtils {
 
-    constructor(props: any) {
-        TagUtils.callBackFromCouchDbGetUsedTags = TagUtils.callBackFromCouchDbGetUsedTags.bind(this)
-    }
-
     static allLocalMetas = [] as Meta[];
     static currentMeta = {} as Meta;
     static currentItem = {} as Item
@@ -52,7 +48,6 @@ export default class TagUtils {
         return allMetas
     }
 
-    // ============================================================= GET METAS FROM LOCAL AND CENTRAL
     //List of selected tags from Local (file) repo
     static async getLocalMetaList(selectedTags: MetaTag[]) {
         const allMetas = await this.getAllMetas() as unknown as Meta[]
@@ -94,25 +89,6 @@ export default class TagUtils {
             });
         });
     }
-
-    /* work in progress
-    static async getCentralMetaList(selectedTags: MetaTag[]) {
-        let filteredMetas = [] as Meta[]
-        //Create a list of copies of metas filtered by view selection and only wearing selected tags
-        if (false) {
-            //Filter: AND: ToDo
-        } else {
-            //Filter: OR   
-            selectedTags.map((testTag) => {
-                CouchDb.getMeta
-            })
-        }
-        lodash.sortBy(filteredMetas, 'value')
-        return filteredMetas
-    }
-    */
-
-    // ============================================================= END
 
     //Get the meta of an item
     static async getOrInitMeta(item: Item) {
