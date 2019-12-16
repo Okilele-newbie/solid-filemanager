@@ -33,7 +33,7 @@ export default class SolidFileClientUtils {
 
     static getServerId() {
         //return serverId eg webId. To be replaced by dynamic data from (currently unused) previous method
-        return 'https://okilele.solid.community'
+        return 'https://okitwo.solid.community'
     }
 
     static async fileClientReadFolder(fileName: string) {

@@ -15,8 +15,6 @@ import HistoryHandler from './Components/HistoryHandler/HistoryHandler';
 
 import SolidFileClientUtils from './Api/SolidFileClientUtils';
 
-import './App.css'
-
 const theme = createMuiTheme({
     palette: {
         //primary: blue,

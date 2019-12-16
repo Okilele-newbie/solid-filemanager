@@ -28,6 +28,7 @@ export default class TagUtils {
     static allLocalMetas = [] as Meta[];
     static currentMeta = {} as Meta;
     static currentItem = {} as Item
+    static currentLocalUsedTags = [] as MetaTag[]
 
     static getTagIndexFullPath() {
         return `${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`
@@ -48,7 +49,7 @@ export default class TagUtils {
         return allMetas
     }
 
-    //List of selected tags from Local (file) repo
+    //List of Meta for selected tags
     static async getLocalMetaList(selectedTags: MetaTag[]) {
         const allMetas = await this.getAllMetas() as unknown as Meta[]
         let filteredMetas = [] as Meta[]
@@ -58,7 +59,7 @@ export default class TagUtils {
         } else {
             //Filter: OR   
             selectedTags.map((testTag) => {
-                //get metas for testTag and reset tags to testTag
+                //get metas for current testTag and reset tags to its value
                 let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
                 havingTagMetas.map(havingTagMeta => {
                     //search already in filtered to add or update list
@@ -81,7 +82,7 @@ export default class TagUtils {
         return filteredMetas
     }
 
-    //getLocalMetaList() helper
+    //getLocalMetaList() helper, returns Metas having testTag
     static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
         return lodash.filter(metas, function (meta) {
             return lodash.some(meta.tags, function (tag) {
@@ -90,7 +91,7 @@ export default class TagUtils {
         });
     }
 
-    //Get the meta of an item
+    //Get or init the meta of a file
     static async getOrInitMeta(item: Item) {
         const url = new URL(item.getUrl())
         //init in case no better foiund
@@ -139,44 +140,67 @@ export default class TagUtils {
         //FINALLY
         this.currentMeta = meta
         this.allLocalMetas = allLocalMetas
+        //update currentLocalUsedTags if already loaded
+        if (this.currentLocalUsedTags !== undefined) {
+            TagUtils.getLocalUsedTags()
+                .then((foundTags: MetaTag[]) => {
+                    this.currentLocalUsedTags = foundTags
+                })
+        }
     }
 
-    static async getLocalUsedTags(alsoSearchOnCentral: boolean) {
-        let usedTag = [] as MetaTag[]
-
-        let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
-        //get list of tags in meta
-        let foundTags = [] as MetaTag[]
-        allMetas.map(meta => {
-            //if alsoSearchOnCentral don't get published tags 
-            if (!alsoSearchOnCentral) foundTags.push(...meta.tags)
-            else {
+    static async getLocalUsedTags() {
+        let usedTags = [] as MetaTag[]
+        if (this.currentLocalUsedTags.length !== 0) usedTags = this.currentLocalUsedTags
+        else {
+            let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
+            //get list of tags in meta
+            let foundTags = [] as MetaTag[]
+            allMetas.map(meta => {
                 meta.tags.map(tag => {
-                    if (!tag.published) foundTags.push(tag)
+                    foundTags.push(tag)
                 })
-            }
-        })
-        usedTag = lodash.uniqWith(foundTags, function (first, second) {
-            return first.tagType === second.tagType && first.value === second.value
-        });
-        usedTag = lodash.sortBy(usedTag, ['tagType', 'value']);
-        //published prop of tags temporarly used as "coming from server?"
-        //usedTag.forEach(tag => tag.published = false)
-        return usedTag
+            })
+            usedTags = lodash.uniqWith(foundTags, function (first, second) {
+                return first.tagType === second.tagType && first.value === second.value
+            });
+            usedTags = lodash.sortBy(usedTags, ['tagType', 'value']);
+        }
+        return usedTags
     }
 
     static async getCentralUsedTags(): Promise<Array<any>> {
         return new Promise((resolve, reject) => {
             CouchDb.getItemsByView(CouchDb.viewNames.GroupedTags, '')
                 .then(
-                    (usedTag: MetaTag[]) => {
-                        //published prop temporarly used as "coming from server?"
-                        usedTag.forEach(tag => tag.published = true)
-                        resolve(usedTag)
+                    (centralTags: MetaTag[]) => {
+                        //published prop temporarly used as "server tag published on local?"
+                        centralTags.forEach(centralTag => { centralTag.published = false })
+                        TagUtils.getLocalUsedTags()
+                            .then((localTags: MetaTag[]) => {
+                                //refresh cache as we have the value
+                                this.currentLocalUsedTags = localTags
+                                localTags.forEach(localTag => {
+                                    if (localTag.published === true) {
+                                        this.markCentralFromLocal(centralTags, localTag)
+                                    }
+                                })
+                                resolve(centralTags)
+                            })
                     }
                 )
         })
 
+    }
+
+    //getCentralUsedTags() helper, marks published=true to central tags found in local tags
+    static markCentralFromLocal(centralTags: MetaTag[], localTag: MetaTag) {
+        let publishedTags: MetaTag[] = lodash.filter(
+            centralTags,
+            function (tag) { return (tag.value === localTag.value) }
+        )
+        //publishedTags.length should be 0 or 1
+        publishedTags.forEach((tag: MetaTag) => tag.published = true)
     }
 
 }

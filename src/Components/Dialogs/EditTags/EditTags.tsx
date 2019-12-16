@@ -21,16 +21,11 @@ class FormDialog extends Component<EditTagsProps> {
     currentMeta = {} as Meta;
     currentItem = {} as Item;
 
-    //Ref on <Autocomplete>
-    autocompleteTag = {} as AutocompleteTag
-
-    constructor(props: EditTagsProps) {
-        super(props);
-    }
-
     componentDidUpdate() {
         const itemUrl = new URL(this.currentItem.getUrl())
         console.log(`currentMeta url: ${this.currentMeta.pathName}`)
+        //In case this called on a item = file
+        //else we directly get the Meta
         if (this.props.item
             && (
                 this.currentMeta.hostName !== itemUrl.hostname
@@ -48,20 +43,14 @@ class FormDialog extends Component<EditTagsProps> {
     //Ultimate target is TagUtils.updateMeta
     handleSave(event: DialogButtonClickEvent) {
         event.preventDefault();
-        //Get data from Autocomplete component
-        if (this.currentMeta.tags !== null) {
-            this.currentMeta.tags = []
-            this.autocompleteTag.values.map((item: MetaTag) => {
-                this.currentMeta.tags.push({
-                    'tagType': 'NamedTag',
-                    'value': item.value,
-                    'published': item.published
-                })
-            })
-        }
-        //TagUtils.updateMeta(this.currentMeta)
+        //cleanup new tags created with autocomplete properties (label and source)
+        let cleanedTags = [] as MetaTag[]
+        this.currentMeta.tags.map(tag => {
+            cleanedTags.push({ 'tagType': 'NamedTag', 'value': tag.value, published: tag.published })
+        })
+        this.currentMeta.tags = cleanedTags
         this.props.handleSubmit(event, this.currentMeta);
-        this.setState({item: null})
+        this.setState({ item: null })
     }
 
     handleClose = {}
@@ -103,8 +92,7 @@ class FormDialog extends Component<EditTagsProps> {
                                 style={{ overflow: 'visible' }}
                             >
                                 <AutocompleteTag
-                                    meta={this.currentMeta}
-                                    ref={(autocompleteTag) => { this.autocompleteTag = autocompleteTag }} />
+                                    meta={this.currentMeta} />
 
                                 {this.currentMeta && this.currentMeta.pathName && this.currentMeta.pathName.split('.').length > 1 ? (
                                     <div><br />

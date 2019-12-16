@@ -6,7 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { styled } from '@material-ui/styles';
 import Checkbox from '@material-ui/core/Checkbox';
-import AntSwitch from '@material-ui/core/Switch';
+import Switch from '@material-ui/core/Switch';
 
 import { getMetaList, MyDispatch } from '../../Actions/Actions';
 import TagUtils, { MetaTag, onServerColor } from '../../Api/TagUtils'
@@ -32,61 +32,41 @@ const MyCheckbox = styled(Checkbox)({
 
 export class TagList extends Component<TagListProps> {
 
-    state = {
-        loading: true,
-    };
-
-    sources = {
-        local: true,
-        central: false
-    };
-
     usedTags = [] as MetaTag[]
     selectedTags = [] as MetaTag[]
 
-    componentDidMount() {
-        this.refreshView()
+    state = {
+        showLocalOrCentral: true,
+        loading: true
     }
 
+    componentDidMount() {
+        this.setState({showLocalOrCentral: true})
+        this.refreshView();
+    };
+
     refreshView() {
-        let count = 0
         this.usedTags = [] as MetaTag[]
-        if (this.sources.local) {
-            count--
-            TagUtils.getLocalUsedTags(this.sources.central)
+        if (this.state.showLocalOrCentral) {
+            TagUtils.getLocalUsedTags()
                 .then(foundTags => {
                     this.usedTags.push(...foundTags as MetaTag[]);
-                    count++
-                    if (count === 0) {
-                        this.setState({ loading: false })
-                    }
+                    this.setState({ loading: false })
                 })
         }
 
-        if (this.sources.central) {
-            count--
+        if (!this.state.showLocalOrCentral) {
             TagUtils.getCentralUsedTags()
                 .then(foundTags => {
                     if (foundTags !== undefined) {
                         this.usedTags.push(...foundTags as MetaTag[]);
-                        count++
-                        if (count === 0) {
-                            this.setState({ loading: false })
-                        }
+                        this.setState({ loading: false })
                     }
                 })
         }
     }
 
-    //check or click a tag to get associated files
-    handleCheck(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
-        //event.preventDefault();
-        const i: number = this.selectedTags.indexOf(metaTag)
-        i !== -1
-            ? this.selectedTags.splice(i, 1)
-            : this.selectedTags.push(metaTag)
-        this.props.handleSubmit(this.selectedTags);
-    }
+    //Select a tag to load related Metas
     handleClick(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
         //event.preventDefault();
         const i: number = this.selectedTags.indexOf(metaTag)
@@ -98,36 +78,28 @@ export class TagList extends Component<TagListProps> {
     }
 
     //local/central
-    handleChange = (name: string) => (event: React.ChangeEvent<HTMLInputElement>): void => {
-        this.sources = ({ ...this.sources, [name]: event.target.checked });
-        this.setState({checkedLocal: true})
+    onChange() {
+        this.setState({ showLocalOrCentral: !this.state.showLocalOrCentral });
         this.setState({ loading: true })
         this.refreshView()
-    };
+    }
 
     render() {
         //console.log(this.usedTags)
         return (
             <div>
-                Local
-                <AntSwitch
-                    checked={this.sources.local}
-                    onChange={this.handleChange('local')}
-                    value="checkedL"
-                    color="primary"
-                />
-                <br/>
-                Central
-                <AntSwitch
-                    checked={this.sources.central}
-                    onChange={this.handleChange('central')}
-                    value="checkedC"
-                    color="primary"
-                />
+                <div>
+                    Local
+                    <Switch
+                        checked={this.state.showLocalOrCentral}
+                        onChange={() => { this.onChange() }}
+                        color="default"
+                    />
+                    Central
+                </div>
                 {this.state.loading ? "Loading ..." : this.PrintList()}
             </div>
         )
-
     };
 
     PrintList = () => {
@@ -147,11 +119,11 @@ export class TagList extends Component<TagListProps> {
                             >
                                 <MyCheckbox
                                     color="primary"
-                                    onChange={e => this.handleCheck(tag, e)}
-                                    checked = {this.selectedTags.find(elt => tag === elt) !== undefined}
+                                    onChange={e => this.handleClick(tag, e)}
+                                    checked={this.selectedTags.find(elt => tag === elt) !== undefined}
                                 />
-                                <MyListItemText 
-                                    id={tag.value} 
+                                <MyListItemText
+                                    id={tag.value}
                                     onClick={e => this.handleClick(tag, e)}>
                                     <span style={itemColor}>{`${tag.value}`}</span>
                                 </MyListItemText>
@@ -162,8 +134,6 @@ export class TagList extends Component<TagListProps> {
                 </MyList >
             )
         }
-        console.log('8 ' + this.state)
-
     }
 }
 

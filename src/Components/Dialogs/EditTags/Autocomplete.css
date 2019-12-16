@@ -6,9 +6,17 @@
 
 
 .leftplace{
-    min-width: 35%;
     display:flex; 
+    min-width: 35%;
     flex-direction:column;
     flex-basis: auto;
     padding: '0 0 0 0'
 }
+
+.rightplace{
+    min-width: 65%;
+}
+
+.creatableSelect{
+    min-width: 95%;
+} 

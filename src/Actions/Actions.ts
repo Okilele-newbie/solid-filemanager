@@ -128,7 +128,6 @@ export const updateTextFile = (fileName: string, content: Blob | string): MyThun
  * Request API to get file tags  and display them
  */
 export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getState) => {
-    console.log(`in Actions.loadAndEditTags with used (?)fileName ${fileName}`)
     dispatch(getFileContent(fileName));
     dispatch(openDialog(DIALOGS.EDITTAGS));
 };

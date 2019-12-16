@@ -5,16 +5,13 @@ import TagList from './Components/TagList/TagList';
 import FileList from './Components/FileList/FileList';
 import MetaList from './Components/Meta/MetaList';
 
-import './App.css'
+import './TreeAndTagList.css'
 
-interface State {
-    showTreeOrTag: boolean;
-}
 
-export default class TreeAndTagList extends Component<{}, State> {
+export default class TreeAndTagList extends Component<{}> {
 
     state = {
-        showTreeOrTag: true as boolean
+        showTreeOrTag: true
     }
 
     onChange() {
@@ -25,27 +22,30 @@ export default class TreeAndTagList extends Component<{}, State> {
 
     render() {
         return (
-            <div className="App">
-                Tags
-                <Switch
-                    checked={this.state.showTreeOrTag}
-                    onChange={() => { this.onChange() }}
-                    value="Tree"
-                    color="default"
-                />
-                Tree
-                {this.state.showTreeOrTag ?
-                    <div className='bodyPlace'>
-                        <div className='leftView'><TreeView /></div>
-                        <FileList />
-                    </div>
-                    :
-                    <div className='bodyPlace'>
-                        <div className='leftView'><TagList /></div>
-                        <MetaList />
-                    </div>
-                }
-            </div >
+            <div>
+                <div className='treeAndTagHeader'>
+                    Tags
+                    <Switch
+                        checked={this.state.showTreeOrTag}
+                        onChange={() => { this.onChange() }}
+                        color="default"
+                    />
+                    Tree
+                </div>
+                <div>
+                    {this.state.showTreeOrTag ?
+                        <div className='bodyPlace'>
+                            <div className='leftView'><TreeView /></div>
+                            <FileList />
+                        </div>
+                        :
+                        <div className='bodyPlace'>
+                            <div className='leftView'><TagList /></div>
+                            <MetaList />
+                        </div>
+                    }
+                </div >
+            </div>
         );
     }
 }

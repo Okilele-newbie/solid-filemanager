@@ -1,0 +1,13 @@
+.treeAndTagHeader{
+    padding: 0 0 0 20px;
+}
+.bodyPlace{
+    display:flex; 
+    flex-direction:row;
+    flex-basis: auto;
+    padding: 0 0 0 10px;
+}
+
+.leftView{
+    min-width: 35%
+}
