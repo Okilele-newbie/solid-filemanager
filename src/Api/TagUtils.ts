@@ -1,7 +1,8 @@
 import SolidFileClientUtils from './SolidFileClientUtils';
 import lodash from 'lodash'
 import { Item } from './Item';
-import CouchDb, { CouchDbRow } from './CouchDb';
+import CouchDb from './CouchDb';
+import config from './../config';
 
 const tagDir = '/public'
 const tagFileName = '_Meta7.json'
@@ -31,7 +32,7 @@ export default class TagUtils {
     static currentLocalUsedTags = [] as MetaTag[]
 
     static getTagIndexFullPath() {
-        return `${SolidFileClientUtils.getServerId()}${tagDir}/${tagFileName}`
+        return `${config.getHost()}${tagDir}/${tagFileName}`
     }
 
     //Local storage, read the file and get all metas in it

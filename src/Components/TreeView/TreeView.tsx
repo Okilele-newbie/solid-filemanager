@@ -7,6 +7,9 @@ import { styled } from '@material-ui/styles';
 
 import SolidFileClientUtils, { IFolder } from '../../Api/SolidFileClientUtils';
 import TreeViewItem from "./TreeViewItem";
+import Loader from '../Loader/Loader'; 
+
+import config from '../../config';
 
 interface IState {
     [index: string]: boolean;
@@ -36,13 +39,13 @@ export default class TreeView extends Component {
     render() {
         if (this.folder.name === undefined) {
             this.initFolders()
-            return (<div></div>)
+            return (<div><Loader/></div>)
         } else {
             return (
                 <div>
                     <MyList
                         subheader={<ListSubheader></ListSubheader>}>
-                        {this.printRows(this.folder.folders,  -1)}
+                        {this.printRows(this.folder.folders, -1)}
                     </MyList>
                 </div>
             )
@@ -85,43 +88,52 @@ export default class TreeView extends Component {
     }
 
     async initFolders() {
-        this.folder = await SolidFileClientUtils.fileClientReadFolder(
-            SolidFileClientUtils.getServerId()
-        )
-        //get folders in the root
-        await this.updateFolder(this.folder)
-        this.forceUpdate()
+        //await SolidFileClientUtils.fileClientPopupLogin()
+        const baseUrl = config.getHost()
+        console.log(baseUrl)
+        if (baseUrl !== null) {
+            this.folder = await SolidFileClientUtils.fileClientReadFolder(baseUrl)
 
-        //and then update those folders so that the arrows (if any) are visible
-        for (var i = 0; i < this.folder.folders.length; i++) {
-            await this.updateFolder(this.folder.folders[i])
+            //get folders in the root
+            await this.updateFolder(this.folder)
+            this.forceUpdate()
+
+            //and then update those folders so that the arrows (if any) are visible
+            for (var i = 0; i < this.folder.folders.length; i++) {
+                await this.updateFolder(this.folder.folders[i])
+            }
+            this.forceUpdate()
         }
-        this.forceUpdate()
     }
 
     //also called on folder icon click
     async updateFolder(item: IFolder) {
+
         //level 0: "item" has just its name and the list of names of ...
         //level 1: subfolders: Read it to get the list of its ...
         //level 2: subfolders and read them to get the number their subfolders and be able to show them as well as the expand/collapse icon for level1.
-        //console.log(`updating folder level 0: ${item.url}`)
-        if (!item.full) {
-            for (var i = 0; i < item.folders.length; i++) {
-                //console.log(`      - adding subfolder to level 0: ${item.folders[i].url}`)
+        console.log(`updating folder level 0: ${item.url}`)
+
+        for (var i = 0; i < item.folders.length; i++) {
+            console.log(`- adding: ${item.folders[i].url}`)
+            if (item.folders[i].known !== true) {
                 item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
-                for (var j = 0; j < item.folders[i].folders.length; j++) {
-                    try {
+                item.folders[i].known = true
+            }
+            for (var j = 0; j < item.folders[i].folders.length; j++) {
+                try {
+                    if (item.folders[i].folders[j].known !== true) {
                         item.folders[i].folders[j] =
                             await SolidFileClientUtils.fileClientReadFolder(item.folders[i].folders[j].url)
-                    } catch (err) {
-                        //Error on some damaged folders, skip ...
+                            item.folders[i].folders[j].known = true
                     }
+                } catch (err) {
+                    //Error on some damaged folders, skip ...
                 }
             }
-            item.full = true
-            //console.log('Set subfolder.full for ' + item.url)
         }
-    };
-    
+        //console.log('Set subfolder.full for ' + item.url)
+    }
+
 }
 

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import TreeAndTagList from './TreeAndTagList';
-import FileList from './Components/FileList/FileList';
 import Navbar from './Components/Navbar/Navbar';
 import ContextMenu from './Components/ContextMenu/ContextMenu';
 import Dialogs from './Components/Dialogs/Dialogs';

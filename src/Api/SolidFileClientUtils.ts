@@ -12,32 +12,29 @@ export interface IFolder {
     content: string; // raw content of the folder's turtle representation,
     files: Array<any>; // an array of files in the folder
     folders: IFolder[];// an array of sub-folders in the folder,
-    full?: boolean;//details of sub folders are read
+    known?: boolean;//details of sub folders are read (in treeview)
 }
 
 export default class SolidFileClientUtils {
 
     static serverId: string = ''
+    static webId: string = ''
 
     //Interface method for FileClient.popupLogin
-    static async fileClientPopupLogin(webId: string) {
+    static async fileClientPopupLogin() {
         await FileClient.popupLogin()
             .then(
                 (webId: string) => {
-                    this.serverId = webId.split("/card")[0];
-                    console.log(`Logged in as ${webId} on ${this.serverId}.`);
+                    const serverId = webId.split("/card")[0];
+                    this.serverId = serverId
+                    this.webId = webId
+                    console.log(`Logged in as ${webId} on ${serverId}.`);
                 }
                 , (err: any) => console.log('Error while loging' + err)
             )
     }
 
-    static getServerId() {
-        //return serverId eg webId. To be replaced by dynamic data from (currently unused) previous method
-        return 'https://okitwo.solid.community'
-    }
-
     static async fileClientReadFolder(fileName: string) {
-        await this.fileClientPopupLogin(this.getServerId())
         let res = {} as IFolder;
         await FileClient.readFolder(fileName).then((content: IFolder) => {
             content.name = decodeURI(content.name)
@@ -47,8 +44,7 @@ export default class SolidFileClientUtils {
             })
             res = content
         }, (err: any) => {
-            console.log(`Not able to read folder ${fileName}`)
-            throw new Error("Read folder error  " + err)
+            alert(`User ${this.webId} is not able to read folder ${fileName} on Pod ${this.serverId}`)
         });
         return res
     }
