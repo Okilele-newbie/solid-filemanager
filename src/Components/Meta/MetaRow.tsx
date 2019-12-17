@@ -7,7 +7,7 @@ import {
 } from '../../Actions/Actions';
 import './Meta.css';
 
-import { Meta } from '../../Api/TagUtils';
+import TagUtils, { Meta, onServerColor } from '../../Api/TagUtils';
 //import { FileItem, Item } from '../../Api/Item';
 
 import ListItem from '@material-ui/core/ListItem';
@@ -25,11 +25,6 @@ const MyListItem = styled(ListItem)({
     padding: '0 16px 0px 16px'
 });
 
-const MyListItemText = styled(ListItemText)({
-    //fontSize: '4.5rem',
-});
-
-
 class MetaRow extends Component<MetaProps> {
 
     render() {
@@ -40,19 +35,28 @@ class MetaRow extends Component<MetaProps> {
         };
         const realSize = null //(item instanceof FileItem) ? item.getDisplaySize() : null;
         let tagList = '' as string
+        let styles
+        let itemColor = { color: 'black' }
         meta.tags.map(tag => {
+            tag.published && itemColor.color === 'black' 
+            ? itemColor = { color: onServerColor } 
+            : itemColor = { color: 'black' }
+
             tagList === ''
                 ? tagList += `${tag.value}`
                 : tagList += ` - ${tag.value}`
         })
+
         tagList = ` (${tagList})`
+
         return (
             <div className="File" data-selected={isSelected}>
                 <MyListItem>
-                    <MyListItemText className="metaname"
-                        primary={meta.pathName.concat(tagList)}
+                    <ListItemText
                         onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu}
-                    />
+                    >
+                        <span style={itemColor}>{`${meta.pathName.concat(tagList)}`}</span>
+                    </ListItemText>
                 </MyListItem>
             </div>
         );
@@ -85,9 +89,7 @@ const mapDispatchToProps = (dispatch: MyDispatch, ownProps: MetaOwnProps): Dispa
     const item = new Item('https://' + meta.hostName + meta.pathName);
 
     return {
-
         handleDoubleClick: () => {
-
             if (item instanceof FileItem) {
                 if (item.isEditable())
                     dispatch(loadAndEditFile(item.name));

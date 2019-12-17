@@ -1,4 +1,4 @@
-
+import config from './../config';
 const FileClient = require('solid-file-client');
 
 export interface IFolder {
@@ -32,6 +32,19 @@ export default class SolidFileClientUtils {
                 }
                 , (err: any) => console.log('Error while loging' + err)
             )
+    }
+
+    static sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms ));
+    }
+
+    static async getHost() {
+        let baseUrl = config.getHost()
+        while (baseUrl === null) {
+            await this.sleep(1000)
+            baseUrl = config.getHost()
+        }
+        return baseUrl
     }
 
     static async fileClientReadFolder(fileName: string) {

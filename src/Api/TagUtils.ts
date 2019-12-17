@@ -6,7 +6,7 @@ import config from './../config';
 
 const tagDir = '/public'
 const tagFileName = '_Meta7.json'
-export const onServerColor = 'mediumspringgreen'
+export const onServerColor = 'rebeccapurple'
 
 //Same as Tag without description for Meta
 export interface MetaTag {
@@ -37,11 +37,12 @@ export default class TagUtils {
 
     //Local storage, read the file and get all metas in it
     static async getAllMetas() {
+        const baseUrl = await SolidFileClientUtils.getHost()
         let allMetas = [] as Meta[]
         if (this.allLocalMetas.length !== 0) allMetas = this.allLocalMetas
         else {
-            var json: string = await SolidFileClientUtils.fileClientReadFileAsString(TagUtils.getTagIndexFullPath())
-            //console.log(`json for allTags=>>${json}<<`)
+            var json: string = await SolidFileClientUtils.fileClientReadFileAsString(`${baseUrl}${tagDir}/${tagFileName}`)
+            //console.log(`json for allTags=>>${json}`)
             if (json === '') SolidFileClientUtils.fileClientcreateFile(TagUtils.getTagIndexFullPath())
             else allMetas = JSON.parse(json)
             //console.log(`Found ${allTags.length} tags all items`)

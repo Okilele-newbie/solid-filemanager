@@ -9,8 +9,6 @@ import SolidFileClientUtils, { IFolder } from '../../Api/SolidFileClientUtils';
 import TreeViewItem from "./TreeViewItem";
 import Loader from '../Loader/Loader'; 
 
-import config from '../../config';
-
 interface IState {
     [index: string]: boolean;
 }
@@ -35,6 +33,56 @@ export default class TreeView extends Component {
         this.updateFolder(folder)
         this.setState({ [folder.url]: !this.state[folder.url] });
     };
+
+    async initFolders() {
+        //await SolidFileClientUtils.fileClientPopupLogin()
+        
+        const baseUrl = await SolidFileClientUtils.getHost()
+        
+        console.log(baseUrl)
+        if (baseUrl !== null) {
+            this.folder = await SolidFileClientUtils.fileClientReadFolder(baseUrl)
+
+            //get folders in the root
+            await this.updateFolder(this.folder)
+            this.forceUpdate()
+
+            //and then update those folders so that the arrows (if any) are visible
+            for (var i = 0; i < this.folder.folders.length; i++) {
+                await this.updateFolder(this.folder.folders[i])
+            }
+            this.forceUpdate()
+        }
+    }
+
+    //also called on folder icon click
+    async updateFolder(item: IFolder) {
+
+        //level 0: "item" has just its name and the list of names of ...
+        //level 1: subfolders: Read it to get the list of its ...
+        //level 2: subfolders and read them to get the number their subfolders and be able to show them as well as the expand/collapse icon for level1.
+        console.log(`updating folder level 0: ${item.url}`)
+
+        for (var i = 0; i < item.folders.length; i++) {
+            console.log(`- adding: ${item.folders[i].url}`)
+            if (item.folders[i].known !== true) {
+                item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
+                item.folders[i].known = true
+            }
+            for (var j = 0; j < item.folders[i].folders.length; j++) {
+                try {
+                    if (item.folders[i].folders[j].known !== true) {
+                        item.folders[i].folders[j] =
+                            await SolidFileClientUtils.fileClientReadFolder(item.folders[i].folders[j].url)
+                            item.folders[i].folders[j].known = true
+                    }
+                } catch (err) {
+                    //Error on some damaged folders, skip ...
+                }
+            }
+        }
+        //console.log('Set subfolder.full for ' + item.url)
+    }
 
     render() {
         if (this.folder.name === undefined) {
@@ -86,54 +134,5 @@ export default class TreeView extends Component {
         }
         colNumber = colNumber - 1
     }
-
-    async initFolders() {
-        //await SolidFileClientUtils.fileClientPopupLogin()
-        const baseUrl = config.getHost()
-        console.log(baseUrl)
-        if (baseUrl !== null) {
-            this.folder = await SolidFileClientUtils.fileClientReadFolder(baseUrl)
-
-            //get folders in the root
-            await this.updateFolder(this.folder)
-            this.forceUpdate()
-
-            //and then update those folders so that the arrows (if any) are visible
-            for (var i = 0; i < this.folder.folders.length; i++) {
-                await this.updateFolder(this.folder.folders[i])
-            }
-            this.forceUpdate()
-        }
-    }
-
-    //also called on folder icon click
-    async updateFolder(item: IFolder) {
-
-        //level 0: "item" has just its name and the list of names of ...
-        //level 1: subfolders: Read it to get the list of its ...
-        //level 2: subfolders and read them to get the number their subfolders and be able to show them as well as the expand/collapse icon for level1.
-        console.log(`updating folder level 0: ${item.url}`)
-
-        for (var i = 0; i < item.folders.length; i++) {
-            console.log(`- adding: ${item.folders[i].url}`)
-            if (item.folders[i].known !== true) {
-                item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
-                item.folders[i].known = true
-            }
-            for (var j = 0; j < item.folders[i].folders.length; j++) {
-                try {
-                    if (item.folders[i].folders[j].known !== true) {
-                        item.folders[i].folders[j] =
-                            await SolidFileClientUtils.fileClientReadFolder(item.folders[i].folders[j].url)
-                            item.folders[i].folders[j].known = true
-                    }
-                } catch (err) {
-                    //Error on some damaged folders, skip ...
-                }
-            }
-        }
-        //console.log('Set subfolder.full for ' + item.url)
-    }
-
 }
 

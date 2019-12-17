@@ -41,7 +41,7 @@ export class TagList extends Component<TagListProps> {
     }
 
     componentDidMount() {
-        this.setState({showLocalOrCentral: true})
+        this.setState({showLocalOrCentral: false})
         this.refreshView();
     };
 

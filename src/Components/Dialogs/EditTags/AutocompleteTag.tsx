@@ -25,7 +25,7 @@ interface MultiValueLabelProps {
     data: MetaTag
 }
 
-//Suggestions (options in component) need label and source (? useful) additional properties
+//Suggestions (options in component) need label additional property
 interface Suggestion extends MetaTag {
     label: string
 }
@@ -40,7 +40,7 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
     render() {
         const { data } = this.props;
         const styles = {
-            color: data.published ? onServerColor : 'black'
+            color: 'red'//data.published ? onServerColor : 'black'
         };
 
         return (
