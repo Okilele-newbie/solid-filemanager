@@ -1,5 +1,4 @@
 import React, { ChangeEvent } from 'react';
-import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
@@ -148,7 +147,6 @@ const mapDispatchToProps = (dispatch: MyDispatch): DispatchProps => {
             dispatch(filterItems(event.currentTarget.value));
         },
         moveUpwards: (n) => {
-          console.log('moveUpwards', n);
           dispatch(moveFolderUpwardsAndRefresh(n));
         },
         handleRefresh: () => dispatch(refreshItemList())

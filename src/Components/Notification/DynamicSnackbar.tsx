@@ -1,10 +1,9 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { withStyles, Theme, createStyles, WithStyles } from '@material-ui/core/styles';
 import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import { connect, MapDispatchToPropsFactory } from 'react-redux';
+import { connect } from 'react-redux';
 import { MyDispatch, resetErrorMessage } from '../../Actions/Actions';
 import { AppState } from '../../Reducers/reducer';
 

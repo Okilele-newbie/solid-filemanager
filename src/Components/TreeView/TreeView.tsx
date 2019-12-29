@@ -5,7 +5,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Collapse from "@material-ui/core/Collapse";
 import { styled } from '@material-ui/styles';
 
-import SolidFileClientUtils, { IFolder } from '../../Api/SolidFileClientUtils';
+import SolidFileClientUtils, { IFolder } from '../../Api/FileUtils';
 import TreeViewItem from "./TreeViewItem";
 import Loader from '../Loader/Loader'; 
 
@@ -35,11 +35,9 @@ export default class TreeView extends Component {
     };
 
     async initFolders() {
-        //await SolidFileClientUtils.fileClientPopupLogin()
         
-        const baseUrl = await SolidFileClientUtils.getHost()
+        const baseUrl = (await SolidFileClientUtils.getWebIdAndHost()).baseUrl
         
-        console.log(baseUrl)
         if (baseUrl !== null) {
             this.folder = await SolidFileClientUtils.fileClientReadFolder(baseUrl)
 
@@ -57,14 +55,7 @@ export default class TreeView extends Component {
 
     //also called on folder icon click
     async updateFolder(item: IFolder) {
-
-        //level 0: "item" has just its name and the list of names of ...
-        //level 1: subfolders: Read it to get the list of its ...
-        //level 2: subfolders and read them to get the number their subfolders and be able to show them as well as the expand/collapse icon for level1.
-        console.log(`updating folder level 0: ${item.url}`)
-
         for (var i = 0; i < item.folders.length; i++) {
-            console.log(`- adding: ${item.folders[i].url}`)
             if (item.folders[i].known !== true) {
                 item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
                 item.folders[i].known = true
@@ -81,8 +72,7 @@ export default class TreeView extends Component {
                 }
             }
         }
-        //console.log('Set subfolder.full for ' + item.url)
-    }
+     }
 
     render() {
         if (this.folder.name === undefined) {

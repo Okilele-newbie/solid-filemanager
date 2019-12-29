@@ -1,25 +1,17 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-
 import {
     setSelectedItemsFromLastTo, loadAndEditFile, loadAndDisplayFile, displaySelectedMediaFile,
     rightClickOnFile, enterFolderByItem, MyDispatch, openContextMenu, toggleSelectedItem, selectItems
 } from '../../Actions/Actions';
 import './Meta.css';
-
-import TagUtils, { Meta, onServerColor } from '../../Api/TagUtils';
-//import { FileItem, Item } from '../../Api/Item';
-
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-//import ListItemIcon from '@material-ui/core/ListItemIcon';
-//import Divider from "@material-ui/core/Divider";
-//import FolderIcon from '@material-ui/icons/Folder';
 import { styled } from '@material-ui/styles';
-//import FileIcon from '@material-ui/icons/InsertDriveFile';
-import blue from '@material-ui/core/colors/blue';
 import { AppState } from '../../Reducers/reducer';
 import { FileItem, Item } from '../../Api/Item';
+import { Meta, onServerColor } from '../../Api/MetaUtils';
+
 
 const MyListItem = styled(ListItem)({
     padding: '0 16px 0px 16px'
@@ -28,23 +20,16 @@ const MyListItem = styled(ListItem)({
 class MetaRow extends Component<MetaProps> {
 
     render() {
-        //const classes = useStyles();
         const { isSelected, meta, handleClickOnName, handleDoubleClick, handleContextMenu } = this.props;
-        const iconStyle = {
-            backgroundColor: isSelected ? blue['A200'] : undefined
-        };
-        const realSize = null //(item instanceof FileItem) ? item.getDisplaySize() : null;
         let tagList = '' as string
-        let styles
         let itemColor = { color: 'black' }
-        meta.tags.map(tag => {
+        meta.tags.forEach(tag => {
             tag.published && itemColor.color === 'black' 
             ? itemColor = { color: onServerColor } 
             : itemColor = { color: 'black' }
 
-            tagList === ''
-                ? tagList += `${tag.value}`
-                : tagList += ` - ${tag.value}`
+            if (tagList !== '') tagList += ` - ` 
+            tagList += `${tag.tagType}:${tag.value}`
         })
 
         tagList = ` (${tagList})`

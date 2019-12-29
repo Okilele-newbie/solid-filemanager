@@ -2,7 +2,7 @@ import * as API from './Api';
 import JSZip from 'jszip';
 import { FileItem, FolderItem, Item } from './Item';
 import ApiCache from './ApiCache';
-import TagUtils, { Meta, MetaTag } from './TagUtils';
+import MetaUtils, { Meta, MetaTag } from './MetaUtils';
 
 const cache = new ApiCache();
 
@@ -92,7 +92,6 @@ export const getFileBlob = (path: string, filename: string): Promise<Blob> => {
  * Wrap API response for taging a file
  */
 export const editTags = (path: string, fileName: string, newFileName: string): Promise<Response> => {
-    console.log('in ApiHandler.ts.editTags')
     path = fixPath(path);
     cache.remove(path);
     return API.editTags(path, fileName, newFileName)
@@ -201,7 +200,7 @@ export const updateFile = (path: string, fileName: string, content: Blob|string)
  * Wrap API response for save Meta definition (including its tags)
  */
 export const updateMeta = (meta: Meta) => {
-    TagUtils.updateMeta(meta)
+    MetaUtils.updateMeta(meta)
         .catch(handleFetchError);
 };
 
@@ -209,7 +208,7 @@ export const updateMeta = (meta: Meta) => {
  * Wrap API to load metas of selectedTags
  */
 export const getMetaList = (selectedTags: MetaTag[]): Promise<Meta[]> => {
-    return TagUtils.getLocalMetaList(selectedTags)
+    return MetaUtils.getLocalMetaList(selectedTags)
         .then()
         .catch(handleFetchError);
 };

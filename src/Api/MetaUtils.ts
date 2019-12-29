@@ -1,11 +1,11 @@
-import SolidFileClientUtils from './SolidFileClientUtils';
+import SolidFileClientUtils from './FileUtils';
 import lodash from 'lodash'
 import { Item } from './Item';
 import CouchDb from './CouchDb';
-import config from './../config';
+import config from '../config';
 
 const tagDir = '/public'
-const tagFileName = '_Meta7.json'
+const tagFileName = '_Meta.json'
 export const onServerColor = 'rebeccapurple'
 
 //Same as Tag without description for Meta
@@ -21,10 +21,10 @@ export interface Meta {
     mimeType: string,
     creationDate: Date,
     tags: MetaTag[],
-    _rev?: string //CouchDb field
+    _rev?: string //CouchDb field 
 }
 
-export default class TagUtils {
+export default class MetaUtils {
 
     static allLocalMetas = [] as Meta[];
     static currentMeta = {} as Meta;
@@ -37,15 +37,13 @@ export default class TagUtils {
 
     //Local storage, read the file and get all metas in it
     static async getAllMetas() {
-        const baseUrl = await SolidFileClientUtils.getHost()
+        const baseUrl = (await SolidFileClientUtils.getWebIdAndHost()).baseUrl
         let allMetas = [] as Meta[]
         if (this.allLocalMetas.length !== 0) allMetas = this.allLocalMetas
         else {
             var json: string = await SolidFileClientUtils.fileClientReadFileAsString(`${baseUrl}${tagDir}/${tagFileName}`)
-            //console.log(`json for allTags=>>${json}`)
-            if (json === '') SolidFileClientUtils.fileClientcreateFile(TagUtils.getTagIndexFullPath())
+            if (json === '') SolidFileClientUtils.fileClientcreateFile(MetaUtils.getTagIndexFullPath())
             else allMetas = JSON.parse(json)
-            //console.log(`Found ${allTags.length} tags all items`)
             this.allLocalMetas = allMetas
         }
         return allMetas
@@ -60,10 +58,10 @@ export default class TagUtils {
             //Filter: AND: ToDo
         } else {
             //Filter: OR   
-            selectedTags.map((testTag) => {
+            selectedTags.forEach((testTag) => {
                 //get metas for current testTag and reset tags to its value
                 let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
-                havingTagMetas.map(havingTagMeta => {
+                havingTagMetas.forEach(havingTagMeta => {
                     //search already in filtered to add or update list
                     let existingFilteredMeta =
                         lodash.find(filteredMetas, function (meta) {
@@ -88,7 +86,10 @@ export default class TagUtils {
     static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
         return lodash.filter(metas, function (meta) {
             return lodash.some(meta.tags, function (tag) {
-                return (tag.value === testTag.value);
+                return (
+                    tag.tagType === testTag.tagType
+                    && tag.value === testTag.value
+                    );
             });
         });
     }
@@ -104,7 +105,6 @@ export default class TagUtils {
             creationDate: new Date(),
             tags: []
         } as Meta
-        //console.log(`loading currentItemMeta ${meta}`)
         //Already the current one?
         if (this.currentMeta !== undefined
             && this.currentMeta.hostName === url.hostname && this.currentMeta.pathName === url.pathname)
@@ -119,7 +119,6 @@ export default class TagUtils {
         }
         this.currentMeta = meta
         this.currentItem = item
-        //console.log(`return ${meta} with url=${meta.pathhName} and tags=${meta.tags}`)
         return meta
     }
 
@@ -129,7 +128,7 @@ export default class TagUtils {
         allLocalMetas = allLocalMetas.filter(el => !(el.hostName === meta.hostName && el.pathName === meta.pathName));
         allLocalMetas.push(meta)
         SolidFileClientUtils.fileClientupdateFile(
-            TagUtils.getTagIndexFullPath(),
+            MetaUtils.getTagIndexFullPath(),
             JSON.stringify(allLocalMetas)
         )
 
@@ -144,7 +143,7 @@ export default class TagUtils {
         this.allLocalMetas = allLocalMetas
         //update currentLocalUsedTags if already loaded
         if (this.currentLocalUsedTags !== undefined) {
-            TagUtils.getLocalUsedTags()
+            MetaUtils.getLocalUsedTags()
                 .then((foundTags: MetaTag[]) => {
                     this.currentLocalUsedTags = foundTags
                 })
@@ -158,11 +157,15 @@ export default class TagUtils {
             let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
             //get list of tags in meta
             let foundTags = [] as MetaTag[]
-            allMetas.map(meta => {
-                meta.tags.map(tag => {
-                    foundTags.push(tag)
+            if (allMetas) {
+                allMetas.forEach(meta => {
+                    if (meta.tags) {
+                        meta.tags.forEach(tag => {
+                            foundTags.push(tag)
+                        })
+                    }
                 })
-            })
+            }
             usedTags = lodash.uniqWith(foundTags, function (first, second) {
                 return first.tagType === second.tagType && first.value === second.value
             });
@@ -173,12 +176,12 @@ export default class TagUtils {
 
     static async getCentralUsedTags(): Promise<Array<any>> {
         return new Promise((resolve, reject) => {
-            CouchDb.getItemsByView(CouchDb.viewNames.GroupedTags, '')
+            CouchDb.getItemsByViewGroupedTags()
                 .then(
                     (centralTags: MetaTag[]) => {
                         //published prop temporarly used as "server tag published on local?"
                         centralTags.forEach(centralTag => { centralTag.published = false })
-                        TagUtils.getLocalUsedTags()
+                        MetaUtils.getLocalUsedTags()
                             .then((localTags: MetaTag[]) => {
                                 //refresh cache as we have the value
                                 this.currentLocalUsedTags = localTags

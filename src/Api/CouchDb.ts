@@ -1,4 +1,4 @@
-import { Meta, MetaTag } from './TagUtils';
+import { Meta, MetaTag } from './MetaUtils';
 
 
 interface CouchDbRowKeyValue {
@@ -33,33 +33,44 @@ export default class CouchDb {
     }
   }
 
+  /*
   static viewNames = { "MetasByTags": "MetasByTags", "MetaById": "MetaById", "GroupedTags": "GroupedTags", }
-  static getItemsByView(viewName: string, key: string): Promise<Array<any>> {
+  static getItemsByView(viewName: string, key: string): Promise<string> {
     //const view = this.viewNames.[{viewName}]
     //const view: string = Object.keys(this.viewNames).find((name: string) => this.viewNames[name] === viewName)
-    return new Promise((resolve, reject) => {
-      let param: string = ''
-      key === ''
-        ? param = `_design/DesignDoc/_view/${viewName}`
-        : param = `_design/DesignDoc/_view/${viewName}?key="${key}"`
+    let param: string = ''
+    key === ''
+      ? param = `_design/DesignDoc/_view/${viewName}`
+      : param = `_design/DesignDoc/_view/${viewName}?key="${key}"`
 
-      //http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true
-      const url: string = `${this.couchDbBaseUrl}/${param}?reduce=true&group=true`
+    //http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true
+    const url: string = `${this.couchDbBaseUrl}/${param}?reduce=true&group=true`
+    return await this.executeQueryonCouch(url)
+  }
+*/
+
+  static async getItemsByViewGroupedTags(): Promise<Array<any>> {
+    //   http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true
+    const url: string = `${this.couchDbBaseUrl}/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true`
+    let json = await this.executeQueryonCouch(url) as string
+    let response = JSON.parse(json)
+    let usedTag = [] as MetaTag[]
+    if (response.rows) {
+      response.rows.forEach((row: CouchDbRowKeyValue) => {
+        const tag = ({ tagType: row.key[0], value: row.key[1], published: true }) as MetaTag
+        usedTag.push(tag)
+      })
+    }
+    return usedTag
+  }
+
+  static executeQueryonCouch(url: string): Promise<string> {
+    return new Promise((resolve, reject) => {
       const xhr = this.createCORSRequest('GET', url);
       if (xhr) {
         xhr.onload = () => {
-          const response = [] as any[]
           if (xhr.status >= 200 && xhr.status < 300) {
-            if (viewName === CouchDb.viewNames.GroupedTags) {
-              let res = JSON.parse(xhr.response)
-              if (res.rows) {
-                res.rows.map((row: CouchDbRowKeyValue) => {
-                  const usedTag = ({ tagType: 'NamedTag', value: row.key, published: true }) as MetaTag
-                  response.push(usedTag)
-                })
-              }
-            }
-            resolve(response)
+            resolve(xhr.response)
           } else {
             reject(xhr.statusText);
           }

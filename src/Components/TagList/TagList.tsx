@@ -9,7 +9,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Switch from '@material-ui/core/Switch';
 
 import { getMetaList, MyDispatch } from '../../Actions/Actions';
-import TagUtils, { MetaTag, onServerColor } from '../../Api/TagUtils'
+import MetaUtils, { MetaTag, onServerColor } from '../../Api/MetaUtils'
 import lodash from 'lodash'
 
 const MyList = styled(List)({
@@ -24,7 +24,6 @@ const MyListItemText = styled(ListItemText)({
     fontSize: '0.9em',
     padding: '0 0 0 0',
 });
-
 
 const MyCheckbox = styled(Checkbox)({
     padding: '0 0 0 0'
@@ -48,7 +47,7 @@ export class TagList extends Component<TagListProps> {
     refreshView() {
         this.usedTags = [] as MetaTag[]
         if (this.state.showLocalOrCentral) {
-            TagUtils.getLocalUsedTags()
+            MetaUtils.getLocalUsedTags()
                 .then(foundTags => {
                     this.usedTags.push(...foundTags as MetaTag[]);
                     this.setState({ loading: false })
@@ -56,7 +55,7 @@ export class TagList extends Component<TagListProps> {
         }
 
         if (!this.state.showLocalOrCentral) {
-            TagUtils.getCentralUsedTags()
+            MetaUtils.getCentralUsedTags()
                 .then(foundTags => {
                     if (foundTags !== undefined) {
                         this.usedTags.push(...foundTags as MetaTag[]);
@@ -66,8 +65,8 @@ export class TagList extends Component<TagListProps> {
         }
     }
 
-    //Select a tag to load related Metas
-    handleClick(metaTag: MetaTag, event: React.ChangeEvent<HTMLInputElement>) {
+    //Select a tag to load related Metas. Target is MetaUtils.getLocalMetaList
+    handleClick(metaTag: MetaTag) {
         //event.preventDefault();
         const i: number = this.selectedTags.indexOf(metaTag)
         i !== -1
@@ -76,16 +75,17 @@ export class TagList extends Component<TagListProps> {
         this.props.handleSubmit(this.selectedTags);
         this.forceUpdate() //CheckBox update
     }
+    
 
     //local/central
     onChange() {
+        this.selectedTags = []
         this.setState({ showLocalOrCentral: !this.state.showLocalOrCentral });
         this.setState({ loading: true })
         this.refreshView()
     }
 
     render() {
-        //console.log(this.usedTags)
         return (
             <div>
                 <div>
@@ -119,13 +119,13 @@ export class TagList extends Component<TagListProps> {
                             >
                                 <MyCheckbox
                                     color="primary"
-                                    onChange={e => this.handleClick(tag, e)}
+                                    onChange={e => this.handleClick(tag)}
                                     checked={this.selectedTags.find(elt => tag === elt) !== undefined}
                                 />
                                 <MyListItemText
                                     id={tag.value}
-                                    onClick={e => this.handleClick(tag, e)}>
-                                    <span style={itemColor}>{`${tag.value}`}</span>
+                                    onClick={e => this.handleClick(tag)}>
+                                    <span style={itemColor}>{`${tag.tagType}:${tag.value}`}</span>
                                 </MyListItemText>
                             </MyListItem>
                         )

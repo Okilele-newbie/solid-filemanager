@@ -2,10 +2,11 @@ import * as APIHandler from '../Api/ApiHandler';
 import * as solidAuth from 'solid-auth-client';
 //import { createBrowserHistory, History } from 'history';
 import { Item, FileItem, FolderItem } from '../Api/Item';
-import { Action, ENTER_FOLDER, SET_LOGGED_IN, SET_LOGGED_OUT, SET_HOST, SET_ITEMS, SET_METAS, SET_WEB_ID, SELECT_ITEMS, TOGGLE_SELECTED_ITEM, DESELECT_ITEM, FILTER_ITEMS, RESET_FILTER, DISPLAY_LOADING, STOP_LOADING, DIALOGS, OPEN_DIALOG, CLOSE_DIALOG, SET_LOADED_BLOB, SET_UPLOAD_FILE_LIST, SET_UPLOAD_FILE_PROGRESS, SET_PATH, MOVE_FOLDER_UPWARDS, RESET_LOADED_BLOB, RESET_HOST, RESET_WEB_ID, SET_ERROR_MESSAGE, OPEN_CONTEXT_MENU, CLOSE_CONTEXT_MENU } from './actionTypes';
+//removed ENTER_FOLDER, 
+import { Action, SET_LOGGED_IN, SET_LOGGED_OUT, SET_HOST, SET_ITEMS, SET_METAS, SET_WEB_ID, SELECT_ITEMS, TOGGLE_SELECTED_ITEM, DESELECT_ITEM, FILTER_ITEMS, RESET_FILTER, DISPLAY_LOADING, STOP_LOADING, DIALOGS, OPEN_DIALOG, CLOSE_DIALOG, SET_LOADED_BLOB, SET_UPLOAD_FILE_LIST, SET_UPLOAD_FILE_PROGRESS, SET_PATH, MOVE_FOLDER_UPWARDS, RESET_LOADED_BLOB, RESET_HOST, RESET_WEB_ID, SET_ERROR_MESSAGE, OPEN_CONTEXT_MENU, CLOSE_CONTEXT_MENU } from './actionTypes';
 import { AppState } from '../Reducers/reducer';
 import { ThunkAction, ThunkDispatch } from 'redux-thunk';
-import { Meta, MetaTag } from '../Api/TagUtils';
+import { Meta, MetaTag } from '../Api/MetaUtils';
 
 export type MyThunk = ThunkAction<void, AppState, null, Action<any>>;
 export type MyDispatch = ThunkDispatch<AppState, null, Action<any>>;
@@ -133,7 +134,6 @@ export const loadAndEditTags = (fileName: string): MyThunk => (dispatch, getStat
 };
 
 export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
-        console.log(`callActions.upfatemeta, ${meta}`)
     APIHandler.updateMeta(meta)
     dispatch(closeDialog(DIALOGS.EDITTAGS));
 }

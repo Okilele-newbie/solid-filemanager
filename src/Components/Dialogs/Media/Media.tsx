@@ -16,10 +16,7 @@ import { DIALOGS } from '../../../Actions/actionTypes';
 class FormDialog extends Component<MediaProps> {
     render() {
         const { file, handleClose, open } = this.props;
-
-        const fileName = file ? file.name : undefined;
         const url = file ? file.url : undefined;
-        const provider = file ? (file.isVideo() ? 'html5' : 'audio') : '';
         const type = file ? (file.isVideo() ? 'video' : 'audio') : undefined;
 
         return (

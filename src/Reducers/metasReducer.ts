@@ -1,4 +1,4 @@
-import { Meta } from "../Api/TagUtils";
+import { Meta } from "../Api/MetaUtils";
 import { Action, SET_METAS } from "../Actions/actionTypes";
 
 interface MetasState {

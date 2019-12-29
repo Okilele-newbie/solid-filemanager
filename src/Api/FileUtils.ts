@@ -1,4 +1,5 @@
-import config from './../config';
+import config from '../config';
+import * as solidAuth from 'solid-auth-client';
 const FileClient = require('solid-file-client');
 
 export interface IFolder {
@@ -15,7 +16,7 @@ export interface IFolder {
     known?: boolean;//details of sub folders are read (in treeview)
 }
 
-export default class SolidFileClientUtils {
+export default class FileUtils {
 
     static serverId: string = ''
     static webId: string = ''
@@ -34,20 +35,27 @@ export default class SolidFileClientUtils {
             )
     }
 
-    static sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms ));
+    static sleep(ms: number) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    static async getHost() {
-        let baseUrl = config.getHost()
-        while (baseUrl === null) {
-            await this.sleep(1000)
-            baseUrl = config.getHost()
+    static webIdAndHost = {webId: '', baseUrl: ''}
+    static async getWebIdAndHost() {
+        if (this.webIdAndHost.webId === '') {
+            let baseUrl = config.getHost()
+            while (baseUrl === null) {
+                await this.sleep(1000)
+                baseUrl = config.getHost()
+            }
+            const session = await solidAuth.currentSession()
+            let webId = session ? session.webId : ''
+            this.webIdAndHost = { webId: webId, baseUrl: baseUrl }
         }
-        return baseUrl
+        return this.webIdAndHost
     }
 
     static async fileClientReadFolder(fileName: string) {
+        const infos = await this.getWebIdAndHost()
         let res = {} as IFolder;
         await FileClient.readFolder(fileName).then((content: IFolder) => {
             content.name = decodeURI(content.name)
@@ -57,7 +65,7 @@ export default class SolidFileClientUtils {
             })
             res = content
         }, (err: any) => {
-            alert(`User ${this.webId} is not able to read folder ${fileName} on Pod ${this.serverId}`)
+            alert(`User ${infos.webId} is not able to read folder ${fileName} on Pod ${infos.baseUrl}`)
         });
         return res
     }
@@ -65,24 +73,20 @@ export default class SolidFileClientUtils {
 
     //Interface method for FileClient.readFile
     static async fileClientReadFileAsString(url: string) {
-        //console.log('Entering read file with url ' + url)
         let res: string = ''
         await FileClient.readFile(url).then(
             (body: string) => {
                 res = body
-                //console.log(`In of fileClientReadFileAsString with res=${res}`)
             }
             , (err: any) => {
                 console.log(`Error when reading file ${url}, returning blank`)
                 //throw new Error("read error  " + err)
             });
-        //console.log(`Out of fileClientReadFileAsString with res=${res}`)
         return res as string
     }
 
     //Interface method for FileClient.createFile
     static async fileClientcreateFile(url: string) {
-        //console.log('Entering create file with url ' + url)
         FileClient.createFile(url)
             .then(
                 () => { return true }
@@ -92,7 +96,6 @@ export default class SolidFileClientUtils {
 
     //Interface method for FileClient.updateFile
     static async fileClientupdateFile(url: string, newContent: string) {
-        //console.log('Entering update file with url ' + url)
         FileClient.updateFile(url, newContent)
             .then(
                 () => { return true }

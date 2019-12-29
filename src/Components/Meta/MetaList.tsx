@@ -5,7 +5,7 @@ import FileListEmptyMessage from './MetaListEmptyMessage';
 import Loader from '../Loader/Loader'; 
 //import { getMetaList} from '../../Actions/Actions';
 import './Meta.css';
-import { Meta } from '../../Api/TagUtils';
+import { Meta } from '../../Api/MetaUtils';
 import { AppState } from '../../Reducers/reducer';
 import './Meta.css';
 
