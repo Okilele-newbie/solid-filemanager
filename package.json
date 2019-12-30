@@ -4,16 +4,16 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/otto-aa/solid-filemanager.git"
+    "url": "git+https://github.com/Okilele-newbie/solid-filemanager.git"
   },
   "keywords": [
     "filemanager",
     "solid"
   ],
-  "author": "A_A",
+  "author": "BSC",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/otto-aa/solid-filemanager/issues"
+    "url": "https://github.com/Okilele-newbie/solid-filemanager/issues"
   },
   "homepage": ".",
   "dependencies": {
