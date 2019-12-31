@@ -1,2 +1,10 @@
-**NOTE: Some things may be broken currently.** There are some changes which still needs to be tested and probably fixed. Due to the current situation I will wait with this until solid-file-client is ready which should (hopefully) be ready this September. Then I will start switching to use solid-file-client and check again everything for errors and compatibility with the inrupt.net and solid.community servers. **I expect everything to work by the end of October**. I am sorry for any inconvenience caused by this.
+**Everything about Solid-FileManager** is to be found in the original Github repository here https://github.com/Otto-AA/solid-filemanager
 
+**In this fork**
+- I changed presentation of folers and files from grid to list
+- I added a treeview.
+Those modifications are actually of no importance
+
+- I added a tag management:
+
+  
