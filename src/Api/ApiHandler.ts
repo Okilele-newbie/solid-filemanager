@@ -207,8 +207,8 @@ export const updateMeta = (meta: Meta) => {
 /**
  * Wrap API to load metas of selectedTags
  */
-export const getMetaList = (selectedTags: MetaTag[]): Promise<Meta[]> => {
-    return MetaUtils.getLocalMetaList(selectedTags)
+export const getMetaList = (selectedTags: MetaTag[], showLocalOrCentral: boolean): Promise<Meta[]> => {
+    return MetaUtils.getMetaList(selectedTags, showLocalOrCentral)
         .then()
         .catch(handleFetchError);
 };

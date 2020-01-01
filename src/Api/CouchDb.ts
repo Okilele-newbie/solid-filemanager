@@ -33,23 +33,8 @@ export default class CouchDb {
     }
   }
 
-  /*
-  static viewNames = { "MetasByTags": "MetasByTags", "MetaById": "MetaById", "GroupedTags": "GroupedTags", }
-  static getItemsByView(viewName: string, key: string): Promise<string> {
-    //const view = this.viewNames.[{viewName}]
-    //const view: string = Object.keys(this.viewNames).find((name: string) => this.viewNames[name] === viewName)
-    let param: string = ''
-    key === ''
-      ? param = `_design/DesignDoc/_view/${viewName}`
-      : param = `_design/DesignDoc/_view/${viewName}?key="${key}"`
-
-    //http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true
-    const url: string = `${this.couchDbBaseUrl}/${param}?reduce=true&group=true`
-    return await this.executeQueryonCouch(url)
-  }
-*/
-
-  static async getItemsByViewGroupedTags(): Promise<Array<any>> {
+  //List of unique used tags
+  static async getItemsByViewGroupedTags(): Promise<MetaTag[]> {
     //   http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true
     const url: string = `${this.couchDbBaseUrl}/_design/DesignDoc/_view/GroupedTags?reduce=true&group=true`
     let json = await this.executeQueryonCouch(url) as string
@@ -63,6 +48,43 @@ export default class CouchDb {
     }
     return usedTag
   }
+
+    //List of Meta for selected Tags
+    static async getMetaFromTags(selectedTags: MetaTag[]): Promise<Meta[]> {
+      let tagsAsString = this.tagArrayTotring(selectedTags)
+      //   http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/MetasByTags?keys=['tagValue'']
+      const url: string = `${this.couchDbBaseUrl}/_design/DesignDoc/_view/MetasByTags?keys=${tagsAsString}`
+      let json = await this.executeQueryonCouch(url) as string
+      let response = JSON.parse(json)
+      let foundMeta = [] as Meta[]
+      if (response.rows) {
+        response.rows.forEach((row: CouchDbRowKeyValue) => {
+          const meta = row.value as unknown as Meta
+          foundMeta.push(meta)
+        })
+      }
+      return foundMeta
+    }
+
+
+
+  //ToDo: callback to handle error (rollback on Local?)
+  static updateMeta(meta: Meta) {
+    const xhr = this.createCORSRequest('GET', `${this.couchDbBaseUrl}/${this.createIdFromMeta(meta)}`);
+    if (xhr) {
+      xhr.onload = function () {
+        const oldMeta = JSON.parse(xhr.responseText)
+        if (oldMeta && oldMeta._rev) meta._rev = oldMeta._rev
+        CouchDb.writeMeta(meta)
+      }
+      xhr.onerror = function () {
+        alert('Error reading original Meta when updating.');
+      };
+      xhr.send();
+    }
+  }
+
+  //"privates", only called by previous updateMeta =================================================
 
   static executeQueryonCouch(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -81,24 +103,6 @@ export default class CouchDb {
     })
   }
 
-
-  //Need a callback to handle error (rollback on Local?)
-  static updateMeta(meta: Meta) {
-    const xhr = this.createCORSRequest('GET', `${this.couchDbBaseUrl}/${this.createIdFromMeta(meta)}`);
-    if (xhr) {
-      xhr.onload = function () {
-        const oldMeta = JSON.parse(xhr.responseText)
-        if (oldMeta && oldMeta._rev) meta._rev = oldMeta._rev
-        CouchDb.writeMeta(meta)
-      }
-      xhr.onerror = function () {
-        alert('Error reading original Meta when updating.');
-      };
-      xhr.send();
-    }
-  }
-
-  //"private", only called by previous updateMeta
   static writeMeta(meta: Meta) {
     const xhr = this.createCORSRequest('PUT', `${this.couchDbBaseUrl}/${this.createIdFromMeta(meta)}`);
     if (xhr) {
@@ -134,4 +138,15 @@ export default class CouchDb {
     const reg = new RegExp("[/]", "g")
     return (meta.hostName + meta.pathName).replace(reg, '.')
   }
+
+  static tagArrayTotring(tags: MetaTag[]) {
+    let tagsAsAstring = ''
+    let comma = ''
+    tags.forEach(tag => {
+      tagsAsAstring += `${comma}"${tag.tagType}:${tag.value}"`
+      comma = ','
+    })
+    return `[${tagsAsAstring}]`
+  }
+
 }

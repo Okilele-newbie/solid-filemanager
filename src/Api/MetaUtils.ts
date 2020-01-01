@@ -1,4 +1,6 @@
 import SolidFileClientUtils from './FileUtils';
+import {FolderItem} from './Item'
+
 import lodash from 'lodash'
 import { Item } from './Item';
 import CouchDb from './CouchDb';
@@ -36,7 +38,7 @@ export default class MetaUtils {
     }
 
     //Local storage, read the file and get all metas in it
-    static async getAllMetas() {
+    static async getAllLocalMetas() {
         const baseUrl = (await SolidFileClientUtils.getWebIdAndHost()).baseUrl
         let allMetas = [] as Meta[]
         if (this.allLocalMetas.length !== 0) allMetas = this.allLocalMetas
@@ -50,8 +52,15 @@ export default class MetaUtils {
     }
 
     //List of Meta for selected tags
-    static async getLocalMetaList(selectedTags: MetaTag[]) {
-        const allMetas = await this.getAllMetas() as unknown as Meta[]
+    static async getMetaList(selectedTags: MetaTag[], showLocalOrCentral: boolean): Promise<Meta[]> {
+        if (!showLocalOrCentral) 
+            return this.getLocalMetaList(selectedTags)
+        else 
+            return this.getCentralMetaList(selectedTags)
+    }
+
+    static async getLocalMetaList(selectedTags: MetaTag[]): Promise<Meta[]> {
+        const allLocalMetas = await this.getAllLocalMetas() as unknown as Meta[]
         let filteredMetas = [] as Meta[]
         //Create a list of copies of metas filtered by view selection and only wearing selected tags
         if (false) {
@@ -60,7 +69,7 @@ export default class MetaUtils {
             //Filter: OR   
             selectedTags.forEach((testTag) => {
                 //get metas for current testTag and reset tags to its value
-                let havingTagMetas = this.filterByMetaTag(allMetas, testTag)
+                let havingTagMetas = this.filterByMetaTag(allLocalMetas, testTag)
                 havingTagMetas.forEach(havingTagMeta => {
                     //search already in filtered to add or update list
                     let existingFilteredMeta =
@@ -82,7 +91,17 @@ export default class MetaUtils {
         return filteredMetas
     }
 
-    //getLocalMetaList() helper, returns Metas having testTag
+    static async getCentralMetaList(selectedTags: MetaTag[]): Promise<Meta[]> {
+        /*
+        CouchDb.getMetaFromTags(selectedTags)
+        .then((foundMetas: Meta[]) => {
+            return foundMetas
+        })
+        */
+       return await CouchDb.getMetaFromTags(selectedTags)
+    }
+
+        //getLocalMetaList() helper, returns Metas having testTag
     static filterByMetaTag(metas: Meta[], testTag: MetaTag) {
         return lodash.filter(metas, function (meta) {
             return lodash.some(meta.tags, function (tag) {
@@ -101,17 +120,17 @@ export default class MetaUtils {
         let meta = {
             hostName: url.hostname,
             pathName: url.pathname,
-            mimeType: '',
+            mimeType: item instanceof FolderItem ? 'FOLDER' : '',
             creationDate: new Date(),
             tags: []
-        } as Meta
+        } as unknown as Meta
         //Already the current one?
         if (this.currentMeta !== undefined
             && this.currentMeta.hostName === url.hostname && this.currentMeta.pathName === url.pathname)
             meta = this.currentMeta
         else {
             //Read in meta storage
-            const allMetas: Meta[] = await this.getAllMetas()
+            const allMetas: Meta[] = await this.getAllLocalMetas()
             if (allMetas !== undefined) {
                 const existingMeta = allMetas.filter(el => el.hostName === url.hostname && el.pathName === url.pathname)[0]
                 if (existingMeta !== undefined) meta = existingMeta
@@ -124,7 +143,7 @@ export default class MetaUtils {
 
     static async updateMeta(meta: Meta) {
         //FILE: remove old meta from list if exists and add the new one
-        let allLocalMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
+        let allLocalMetas: Meta[] = await this.getAllLocalMetas() as unknown as Meta[]
         allLocalMetas = allLocalMetas.filter(el => !(el.hostName === meta.hostName && el.pathName === meta.pathName));
         allLocalMetas.push(meta)
         SolidFileClientUtils.fileClientupdateFile(
@@ -154,7 +173,7 @@ export default class MetaUtils {
         let usedTags = [] as MetaTag[]
         if (this.currentLocalUsedTags.length !== 0) usedTags = this.currentLocalUsedTags
         else {
-            let allMetas: Meta[] = await this.getAllMetas() as unknown as Meta[]
+            let allMetas: Meta[] = await this.getAllLocalMetas() as unknown as Meta[]
             //get list of tags in meta
             let foundTags = [] as MetaTag[]
             if (allMetas) {
@@ -174,12 +193,13 @@ export default class MetaUtils {
         return usedTags
     }
 
+    //Get tags on Central and mark them "also on local?"
     static async getCentralUsedTags(): Promise<Array<any>> {
         return new Promise((resolve, reject) => {
             CouchDb.getItemsByViewGroupedTags()
                 .then(
                     (centralTags: MetaTag[]) => {
-                        //published prop temporarly used as "server tag published on local?"
+                        //meta.published property fakely used as "central tag not published on this local?"
                         centralTags.forEach(centralTag => { centralTag.published = false })
                         MetaUtils.getLocalUsedTags()
                             .then((localTags: MetaTag[]) => {
@@ -198,7 +218,7 @@ export default class MetaUtils {
 
     }
 
-    //getCentralUsedTags() helper, marks published=true to central tags found in local tags
+    //getCentralUsedTags() helper: marks published=true to central tags found in local tags
     static markCentralFromLocal(centralTags: MetaTag[], localTag: MetaTag) {
         let publishedTags: MetaTag[] = lodash.filter(
             centralTags,

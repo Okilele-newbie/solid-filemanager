@@ -89,8 +89,8 @@ class FormDialog extends Component<EditTagsProps> {
             }
 
             return (
-                <div>
-                    <Dialog
+                <div id='1'>
+                    <Dialog id='2'
                         fullScreen={false}
                         open={open}
                         onClose={handleClose}
@@ -102,9 +102,9 @@ class FormDialog extends Component<EditTagsProps> {
                             }
                         }}
                     >
-                        <form>
+                        <form id='3 '>
                             <DialogTitle
-                                id="form-dialog-edit">Editing TAGS: {this.currentItem.getDisplayName()}
+                                id="form-dialog-edit">Editing TAGS : {this.currentItem.getDisplayName()}
                             </DialogTitle>
                             <DialogContent
                                 style={{ overflow: 'visible' }}

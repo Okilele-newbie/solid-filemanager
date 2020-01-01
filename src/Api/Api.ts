@@ -8,7 +8,10 @@ import { FolderItems } from './types';
  * Fetch API to get item
  */
 export async function fetchFile(path: string, fileName?: string): Promise<Response>  {
+    console.log(path)
+    console.log(fileName)
     const url = buildFileUrl(path, fileName);
+    console.log(url)
     return solidAuth.fetch(url)
         .then(assertSuccessfulResponse);
 };

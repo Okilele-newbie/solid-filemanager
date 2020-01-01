@@ -11,12 +11,10 @@
 @media (min-width : 600px) {
     .FileList .File {
         float: left;
-        /*width: 33.3%;*/
     }
 }
 @media (min-width : 1024px) {
     .FileList .File {
         float: left;
-        /*width: 25%;*/
     }
 }

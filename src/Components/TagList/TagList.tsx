@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import List from "@material-ui/core/List";
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { styled } from '@material-ui/styles';
+//import { styled } from '@material-ui/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Switch from '@material-ui/core/Switch';
 
@@ -12,6 +12,7 @@ import { getMetaList, MyDispatch } from '../../Actions/Actions';
 import MetaUtils, { MetaTag, onServerColor } from '../../Api/MetaUtils'
 import lodash from 'lodash'
 
+/*
 const MyList = styled(List)({
     minWidth: 'max-content'
 });
@@ -28,6 +29,7 @@ const MyListItemText = styled(ListItemText)({
 const MyCheckbox = styled(Checkbox)({
     padding: '0 0 0 0'
 });
+*/
 
 export class TagList extends Component<TagListProps> {
 
@@ -72,7 +74,7 @@ export class TagList extends Component<TagListProps> {
         i !== -1
             ? this.selectedTags.splice(i, 1)
             : this.selectedTags.push(metaTag)
-        this.props.handleSubmit(this.selectedTags);
+        this.props.handleSubmit(this.selectedTags, this.state.showLocalOrCentral);
         this.forceUpdate() //CheckBox update
     }
     
@@ -106,32 +108,32 @@ export class TagList extends Component<TagListProps> {
         if (!this.state.loading) {
             this.usedTags = lodash.sortBy(this.usedTags, ['tagType', 'value']);
             return (
-                < MyList className='leftPane' >
+                < List style={{minWidth: 'max-content'}} className='leftPane' >
                     {this.usedTags.map(tag => {
                         const itemColor = {
                             color: tag.published ? onServerColor : 'black'
                         };
                         return (
-                            <MyListItem
+                            <ListItem style={{ padding: '0 0 0 10px'}}
                                 key={tag.value}
                                 role={undefined}
                                 dense button
                             >
-                                <MyCheckbox
+                                <Checkbox style={{ padding: '0 0 0 0'}}
                                     color="primary"
                                     onChange={e => this.handleClick(tag)}
                                     checked={this.selectedTags.find(elt => tag === elt) !== undefined}
                                 />
-                                <MyListItemText
+                                <ListItemText style={{ padding: '0 0 0 0'}}
                                     id={tag.value}
                                     onClick={e => this.handleClick(tag)}>
-                                    <span style={itemColor}>{`${tag.tagType}:${tag.value}`}</span>
-                                </MyListItemText>
-                            </MyListItem>
+                                    <span style={itemColor}>{`${tag.tagType}: ${tag.value}`}</span>
+                                </ListItemText>
+                            </ListItem>
                         )
                     })
                     }
-                </MyList >
+                </List >
             )
         }
     }
@@ -147,7 +149,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleSubmit(selectedTags: MetaTag[]): void;
+    handleSubmit(selectedTags: MetaTag[], showLocalOrCentral: boolean): void;
 }
 
 interface TagListProps extends TagListOwnProps, StateProps, DispatchProps { }
@@ -156,8 +158,8 @@ const mapStateToProps = () => ({});
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TagListOwnProps): DispatchProps => {
     return {
-        handleSubmit: (selectedTags: MetaTag[]) => {
-            dispatch(getMetaList(selectedTags));
+        handleSubmit: (selectedTags: MetaTag[], showLocalOrCentral: boolean) => {
+            dispatch(getMetaList(selectedTags, showLocalOrCentral));
         }
     };
 };

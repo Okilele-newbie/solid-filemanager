@@ -11,20 +11,17 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Divider from "@material-ui/core/Divider";
 import FolderIcon from '@material-ui/icons/Folder';
-import { styled } from '@material-ui/styles';
+//import { styled } from '@material-ui/styles';
 import FileIcon from '@material-ui/icons/InsertDriveFile';
 import blue from '@material-ui/core/colors/blue';
 import { FileItem, Item } from '../../Api/Item';
 import { AppState } from '../../Reducers/reducer';
 
+/*
 const MyListItem = styled(ListItem)({
     padding: '0 16px 0px 16px',
 });
-
-const MyListItemText = styled(ListItemText)({
-    fontSize: '4.5rem',
-});
-
+*/
 
 class File extends Component<FileProps> {
 
@@ -37,16 +34,16 @@ class File extends Component<FileProps> {
         const realSize = (item instanceof FileItem) ? item.getDisplaySize() : null;
         return (
             <div className="File" data-selected={isSelected}>
-                <MyListItem>
+                <ListItem style={{ padding: '0 16px 0px 16px'}}>
                     <ListItemIcon>
                         <div style={iconStyle} onClick={handleClickOnFolder} >
                             {(item instanceof FileItem) ? <FileIcon /> : <FolderIcon />}
                         </div>
                     </ListItemIcon>
-                    <MyListItemText className="filename" primary={item.getDisplayName()} secondary={realSize}
+                    <ListItemText className="filename" primary={item.getDisplayName()} secondary={realSize}
                         onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} />
                     <Divider absolute />
-                </MyListItem>
+                </ListItem>
             </div>
         );
     }

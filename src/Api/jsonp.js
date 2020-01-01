@@ -1,5 +1,5 @@
 export default function CallJsonP(callback1, searchedString) {
-    const autoComplete = `http://suggestqueries.google.com/complete/search?client=firefox&q=${searchedString}`
+    const autoComplete = `https://suggestqueries.google.com/complete/search?client=firefox&q=${searchedString}`
     jsonp(
         autoComplete,
         (response) => callback1(response)

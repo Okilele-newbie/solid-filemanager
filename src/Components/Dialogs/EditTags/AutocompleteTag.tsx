@@ -7,7 +7,7 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 import Checkbox from '@material-ui/core/Checkbox';
-import { styled } from '@material-ui/styles';
+//import { styled } from '@material-ui/styles';
 import './Autocomplete.css'
 
 interface MultiValueLabelProps {
@@ -33,12 +33,12 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
             <div id={data.value}
                 style={styles}
                 onClick={this.tagHandleClick.bind(this)}>
-                {data.tagType}:{data.value}
+                {data.tagType}: {data.value}
             </div>
         )
     }
 }
-
+/*
 const MyCheckbox = styled(Checkbox)({
     padding: '0 0 0 0'
 });
@@ -49,6 +49,7 @@ const MyFormControlLabel = styled(FormControlLabel)({
 const MyRadio = styled(Radio)({
     padding: '0 20px 5px 0px'
 });
+*/
 
 interface PopupProps {
     [x: string]: any,
@@ -175,9 +176,9 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 <div className='leftplace'>
                     <FormControl>
                         <RadioGroup aria-label="gender" value={this.source} onChange={this.handleRadioChange}>
-                            <MyFormControlLabel value="local" control={<MyRadio color="primary" />} label="Local" labelPlacement="start" />
-                            <MyFormControlLabel value="central" control={<MyRadio color="primary" />} label="Central" labelPlacement="start" />
-                            <MyFormControlLabel value="google" control={<MyRadio color="primary" />} label="Google" labelPlacement="start" />
+                            <FormControlLabel value="local" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Local" labelPlacement="start" style={{padding: '0 15px 5px 0'}}/>
+                            <FormControlLabel value="central" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Central" labelPlacement="start" style={{padding: '0 15px 5px 0'}} />
+                            <FormControlLabel value="google" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Google" labelPlacement="start" style={{padding: '0 15px 5px 0'}}  />
                         </RadioGroup>
                     </FormControl>
                 </div>
@@ -195,8 +196,8 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                         />
                     </div>
                     <div>
-                        <MyCheckbox
-                            color="primary"
+                        <Checkbox
+                            color="primary" style={{padding: '0 0 0 0'}}
                             onChange={e => this.selectAllToCentral(e)}
                         /> Publish all tags to central
                     </div>

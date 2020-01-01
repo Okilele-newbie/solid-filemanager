@@ -5,7 +5,7 @@ import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText"
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
-import { styled } from '@material-ui/styles';
+//import { styled } from '@material-ui/styles';
 
 import { enterFolderByItem, MyDispatch } from '../../Actions/Actions';
 
@@ -29,14 +29,16 @@ interface IState {
     [index: string]: boolean;
 }
 
-const MyListItem = styled(ListItem)({
+/*
+const MyListItem =  styled(ListItem)({
     padding: '0 16px 0px 16px',
 });
 
 const MyListItemText = styled(ListItemText)({
     fontSize: '0.8em',
-    padding: '0 0px'
+    padding: '0 0px',
 });
+*/
 
 class TreeViewItem extends React.Component<TreeViewProps> {
 
@@ -49,7 +51,7 @@ class TreeViewItem extends React.Component<TreeViewProps> {
         const { item, handleClick, colNumber, itemHandleClick } = this.props
 
         return (
-            <MyListItem
+            <ListItem style={{ padding: '0 16px 0px 16px'}}
                 button
                 key={item.name}
                 onClick={itemHandleClick.bind(this, item)}
@@ -65,14 +67,14 @@ class TreeViewItem extends React.Component<TreeViewProps> {
                     ) : (this.Blank())}
                 </div>
 
-                <MyListItemText
+                <ListItemText style={{ fontSize: '0.8em', padding: '0 0px',}}
                     key={item.name + 'txt'}
                     onClick={handleClick}
                 >
                     {item.name}
-                </MyListItemText>
+                </ListItemText>
 
-            </MyListItem>
+            </ListItem>
         )
     }
 

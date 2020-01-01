@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import List from "@material-ui/core/List";
 import ListSubheader from "@material-ui/core/ListSubheader";
 import Collapse from "@material-ui/core/Collapse";
-import { styled } from '@material-ui/styles';
+//import { styled } from '@material-ui/styles';
 
 import SolidFileClientUtils, { IFolder } from '../../Api/FileUtils';
 import TreeViewItem from "./TreeViewItem";
@@ -13,11 +13,12 @@ interface IState {
     [index: string]: boolean;
 }
 
-
+/*
 const MyList = styled(List)({
     width: 'max-content',
     flexShrink: 0
 });
+*/
 
 export default class TreeView extends Component {
     state = {} as IState;
@@ -81,10 +82,10 @@ export default class TreeView extends Component {
         } else {
             return (
                 <div>
-                    <MyList
+                    <List style={{width: 'max-content', flexShrink: 0 }}
                         subheader={<ListSubheader></ListSubheader>}>
                         {this.printRows(this.folder.folders, -1)}
-                    </MyList>
+                    </List>
                 </div>
             )
         }

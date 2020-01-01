@@ -68,7 +68,7 @@ class FormDialog extends Component<EditProps> {
             <div>
               <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-edit" fullWidth={true} maxWidth={'sm'}>
                 <form>
-                  <DialogTitle id="form-dialog-edit">Editing file xx: {itemName} </DialogTitle>
+                  <DialogTitle id="form-dialog-edit">Editing file {itemName} </DialogTitle>
                   <DialogContent>
                     <DialogContentText>
                       {this.state.loading ? 'Loading...' : textArea}

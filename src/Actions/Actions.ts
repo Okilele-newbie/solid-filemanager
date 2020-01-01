@@ -141,9 +141,9 @@ export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
 /**
  * Request API to display Meta list for the selected tag
  */
-export const getMetaList = (selectedTags: MetaTag[]): MyThunk => (dispatch, getState) => {
+export const getMetaList = (selectedTags: MetaTag[], showLocalOrCentral: boolean): MyThunk => (dispatch, getState) => {
         dispatch(displayLoading());
-        APIHandler.getMetaList(selectedTags)
+        APIHandler.getMetaList(selectedTags, showLocalOrCentral)
             .then(items => dispatch(setMetas(items)))
             .catch(r => dispatch(setErrorMessage(String(r))))
             .finally(() => dispatch(stopLoading())); 
@@ -314,6 +314,11 @@ export const loadAndEditFile = (fileName: string): MyThunk => (dispatch, getStat
     dispatch(openDialog(DIALOGS.EDIT));
 };
 
+export const loadAndEditFileFromTag = (fileName: string, path: string[]): MyThunk => (dispatch, getState) => {
+    dispatch(setPath(path));
+    dispatch(loadAndEditFile(fileName));
+};
+
 
 /**
  * Request API to get file content and display it
@@ -323,11 +328,21 @@ export const loadAndDisplayFile = (fileName: string): MyThunk => (dispatch, getS
     dispatch(openDialog(DIALOGS.CONTENT));
 };
 
+export const loadAndDisplayFileFromTag = (fileName: string, path: string[]): MyThunk => (dispatch, getState) => {
+    dispatch(setPath(path));
+    dispatch(loadAndDisplayFile(fileName));
+};
+
 /**
  * Request API to display an audio or video file
  */
 export const displaySelectedMediaFile = (): MyThunk => (dispatch, getState) => {
     dispatch(openDialog(DIALOGS.MEDIA));
+};
+
+export const displaySelectedMediaFileFromTag = (path: string[]): MyThunk => (dispatch, getState) => {
+    dispatch(setPath(path));
+    dispatch(displaySelectedMediaFile());
 };
 
 

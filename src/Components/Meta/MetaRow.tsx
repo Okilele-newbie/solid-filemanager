@@ -1,48 +1,55 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import {
-    setSelectedItemsFromLastTo, loadAndEditFile, loadAndDisplayFile, displaySelectedMediaFile,
+    setSelectedItemsFromLastTo, loadAndEditFileFromTag, loadAndDisplayFileFromTag, displaySelectedMediaFileFromTag,
     rightClickOnFile, enterFolderByItem, MyDispatch, openContextMenu, toggleSelectedItem, selectItems
 } from '../../Actions/Actions';
 import './Meta.css';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { styled } from '@material-ui/styles';
 import { AppState } from '../../Reducers/reducer';
-import { FileItem, Item } from '../../Api/Item';
+import { FileItem, FolderItem, Item } from '../../Api/Item';
 import { Meta, onServerColor } from '../../Api/MetaUtils';
-
-
-const MyListItem = styled(ListItem)({
-    padding: '0 16px 0px 16px'
-});
 
 class MetaRow extends Component<MetaProps> {
 
     render() {
         const { isSelected, meta, handleClickOnName, handleDoubleClick, handleContextMenu } = this.props;
+        /*
         let tagList = '' as string
         let itemColor = { color: 'black' }
         meta.tags.forEach(tag => {
-            tag.published && itemColor.color === 'black' 
-            ? itemColor = { color: onServerColor } 
-            : itemColor = { color: 'black' }
+            console.log('1')
+            tag.published && itemColor.color === 'black'
+                ? itemColor = { color: onServerColor }
+                : itemColor = { color: 'black' }
 
-            if (tagList !== '') tagList += ` - ` 
-            tagList += `${tag.tagType}:${tag.value}`
+            if (tagList !== '') tagList += ` - `
+            tagList += <span style={itemColor}>`${tag.tagType}: ${tag.value}`</span>
         })
 
         tagList = ` (${tagList})`
-
+        */
+        let prevChars = ''
         return (
             <div className="File" data-selected={isSelected}>
-                <MyListItem>
+                <ListItem style={{ padding: '0 16px 0px 16px' }}>
                     <ListItemText
-                        onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu}
-                    >
-                        <span style={itemColor}>{`${meta.pathName.concat(tagList)}`}</span>
+                        onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} >
+                        {meta.hostName} - {meta.pathName}
+                        {meta.tags.map(tag => {
+                            const itemColor = tag.published ? { color: onServerColor } : { color: 'black' }
+                            prevChars = prevChars === '' ? ' (' : ' - '
+                            return (
+                                <span style={itemColor}>
+                                    {prevChars}{tag.tagType}: {tag.value}
+                                </span>
+                            )
+                        })
+                        }
+                        )
                     </ListItemText>
-                </MyListItem>
+                </ListItem>
             </div>
         );
     }
@@ -51,7 +58,7 @@ class MetaRow extends Component<MetaProps> {
 
 interface MetaOwnProps {
     meta: Meta;
-    item: Item;
+    //item: Item;
 }
 interface StateProps {
     isSelected: boolean;
@@ -71,17 +78,23 @@ const mapStateToProps = (state: AppState, ownProps: MetaOwnProps): StateProps =>
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: MetaOwnProps): DispatchProps => {
     const meta = ownProps.meta;
-    const item = new Item('https://' + meta.hostName + meta.pathName);
+    let path = meta.pathName.split('/') as string[]
+    path.shift()
+    path.pop()
+
+    let item = {} as Item
+    if (meta.mimeType === 'FOLDER') item = new FolderItem('https://' + meta.hostName + meta.pathName)
+    else item = new FileItem('https://' + meta.hostName + meta.pathName)
 
     return {
         handleDoubleClick: () => {
             if (item instanceof FileItem) {
                 if (item.isEditable())
-                    dispatch(loadAndEditFile(item.name));
+                    dispatch(loadAndEditFileFromTag(item.name, path));
                 else if (item.isImage())
-                    dispatch(loadAndDisplayFile(item.name));
+                    dispatch(loadAndDisplayFileFromTag(item.name, path));
                 else if (item.isMedia())
-                    dispatch(displaySelectedMediaFile());
+                    dispatch(displaySelectedMediaFileFromTag(path));
             }
             else
                 dispatch(enterFolderByItem(item));
