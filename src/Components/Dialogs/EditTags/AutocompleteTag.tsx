@@ -38,31 +38,33 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
         )
     }
 }
-/*
-const MyCheckbox = styled(Checkbox)({
-    padding: '0 0 0 0'
-});
-
-const MyFormControlLabel = styled(FormControlLabel)({
-    padding: '0 15px 5px 0'
-});
-const MyRadio = styled(Radio)({
-    padding: '0 20px 5px 0px'
-});
-*/
 
 interface PopupProps {
     [x: string]: any,
     meta: Meta,
-    setSaveText(saveTextLevel: number): void;
+    setSaveButtonText(saveTextLevel: number): void;
 }
 
 interface PopupState {
     suggests: Suggestion[]
 }
 //Suggestions (options in component) need label additional property
-interface Suggestion extends MetaTag {
+interface ISuggestion extends MetaTag {
     label: string
+}
+
+class Suggestion {
+    tagType: string
+    value: string
+    published: boolean
+    label: string
+
+    constructor(text: string) {
+        this.tagType = 'FreeTag'
+        this.value = text;
+        this.published = false;
+        this.label = text;
+    }
 }
 
 export default class AutocompleteTag extends React.Component<PopupProps, PopupState> {
@@ -88,13 +90,20 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
 
     //select a suggestion or delete a tag: items parameter is the list of ALL selected values
     handleChangeTagList(items: Suggestion[]) {
+        if (items) {
+            for (var i = 0; i < items.length; i++) {
+                if (!(items[i] instanceof Suggestion)) {
+                    items[i] = new Suggestion(items[i].label)
+                }
+            }
+        }
         this.props.meta.tags = items
-        this.setSaveTextParameter()
+        this.setSaveButtonText()
         this.forceUpdate()
     }
 
     //Called from here when modifying the list of tags and send to parent
-    setSaveTextParameter() {
+    setSaveButtonText() {
         let saveTextLevel = 0
         if (this.props.meta.tags) {
             this.props.meta.tags.forEach((tag) => {
@@ -108,7 +117,7 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 }
             })
         }
-        this.props.setSaveText(saveTextLevel)
+        this.props.setSaveButtonText(saveTextLevel)
     }
 
     //Change source of suggestions for tags
@@ -127,7 +136,8 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 CallJsonP((suggests: any[]) => {
                     //suggests[1] creates a new Io
                     suggests[1].forEach((item: string) => {
-                        const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': item, published: false, 'label': item }
+                        //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': item, published: false, 'label': item }
+                        const suggestion = new Suggestion(item)
                         retVal.push(suggestion)
                     })
                     this.setState({ suggests: retVal })
@@ -139,7 +149,8 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 MetaUtils.getLocalUsedTags()
                     .then((foundTags: MetaTag[]) => {
                         foundTags.forEach(tag => {
-                            const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
+                            //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
+                            const suggestion = new Suggestion(tag.value)
                             retVal.push(suggestion);
                         })
                         this.setState({ suggests: retVal })
@@ -150,7 +161,8 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 MetaUtils.getCentralUsedTags()
                     .then((foundTags: MetaTag[]) => {
                         foundTags.forEach(tag => {
-                            const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
+                            //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
+                            const suggestion = new Suggestion(tag.value)
                             retVal.push(suggestion);
                         })
                         this.setState({ suggests: retVal })
@@ -158,7 +170,7 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
             }
         }
         //Also trigered when clikcing on item to make it published/not
-        this.setSaveTextParameter()
+        this.setSaveButtonText()
     }
 
     //set all to published
@@ -166,7 +178,7 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
         this.props.meta.tags.forEach((tag) => {
             tag.published = event.target.checked
         })
-        this.setSaveTextParameter()
+        this.setSaveButtonText()
         this.forceUpdate()
     }
 
@@ -176,9 +188,9 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 <div className='leftplace'>
                     <FormControl>
                         <RadioGroup aria-label="gender" value={this.source} onChange={this.handleRadioChange}>
-                            <FormControlLabel value="local" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Local" labelPlacement="start" style={{padding: '0 15px 5px 0'}}/>
-                            <FormControlLabel value="central" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Central" labelPlacement="start" style={{padding: '0 15px 5px 0'}} />
-                            <FormControlLabel value="google" control={<Radio color="primary" style={{padding: '0 20px 5px 0px'}}/>} label="Google" labelPlacement="start" style={{padding: '0 15px 5px 0'}}  />
+                            <FormControlLabel value="local" control={<Radio color="primary" style={{ padding: '0 20px 5px 0px' }} />} label="Local" labelPlacement="start" style={{ padding: '0 15px 5px 0' }} />
+                            <FormControlLabel value="central" control={<Radio color="primary" style={{ padding: '0 20px 5px 0px' }} />} label="Central" labelPlacement="start" style={{ padding: '0 15px 5px 0' }} />
+                            <FormControlLabel value="google" control={<Radio color="primary" style={{ padding: '0 20px 5px 0px' }} />} label="Google" labelPlacement="start" style={{ padding: '0 15px 5px 0' }} />
                         </RadioGroup>
                     </FormControl>
                 </div>
@@ -197,7 +209,7 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                     </div>
                     <div>
                         <Checkbox
-                            color="primary" style={{padding: '0 0 0 0'}}
+                            color="primary" style={{ padding: '0 0 0 0' }}
                             onChange={e => this.selectAllToCentral(e)}
                         /> Publish all tags to central
                     </div>

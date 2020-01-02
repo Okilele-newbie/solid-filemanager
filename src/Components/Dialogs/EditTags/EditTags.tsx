@@ -19,37 +19,23 @@ class FormDialog extends Component<EditTagsProps> {
 
     constructor(props: any) {
         super(props)
-        this.setSaveText = this.setSaveText.bind(this)
+        this.setSaveButtonText = this.setSaveButtonText.bind(this)
     }
 
     //sent to TreeViewItem for expand/collapse handled here
-    setSaveText(saveTextLevel: number) {
-        if (saveTextLevel === 1) this.saveText = 'Save all to local'
-        if (saveTextLevel === 2) this.saveText = 'Save all to local and some to central'
-        if (saveTextLevel === 3) this.saveText = 'Save all to local and central'
-        this.setState({ saveText: this.saveText });
+    setSaveButtonText(saveTextLevel: number) {
+        if (saveTextLevel === 1) this.saveButtonText = 'Save all to local'
+        if (saveTextLevel === 2) this.saveButtonText = 'Save all to local and some to central'
+        if (saveTextLevel === 3) this.saveButtonText = 'Save all to local and central'
+        this.setState({ saveText: this.saveButtonText });
     };
 
     //Init mandatory as render sn invoked on left click on item, even before Edit tag is choosed
     currentMeta = {} as Meta;
-    currentItem = {} as Item;
-    saveText = ''
+    saveButtonText = ''
 
     componentDidUpdate() {
-        const itemUrl = new URL(this.currentItem.getUrl())
-        //In case this called on a item = file
-        //else we directly get the Meta
-        if (this.props.item
-            && (
-                this.currentMeta.hostName !== itemUrl.hostname
-                || this.currentMeta.pathName !== itemUrl.pathname
-            )) {
-            this.currentItem = this.props.item as Item
-            MetaUtils.getOrInitMeta(this.currentItem)
-                .then(response => {
-                    this.currentMeta = response;
-                })
-        }
+
     }
 
     //target function is MetaUtils.updateMeta
@@ -65,6 +51,7 @@ class FormDialog extends Component<EditTagsProps> {
         this.currentMeta.tags = cleanedTags
         this.props.handleSubmit(event, this.currentMeta);
         this.setState({ item: null })
+        MetaUtils.allLocalMetas = []
     }
 
     handleClose = {}
@@ -76,11 +63,17 @@ class FormDialog extends Component<EditTagsProps> {
     };
 
     render() {
+        if (this.props.item) {
+            MetaUtils.getOrInitMeta(this.props.item)
+                .then(response => {
+                    this.currentMeta = response;
+                })
+        }
         //handle close: Rdux, sent by store
         const { handleClose, open, item } = this.props;
 
         if (item) {
-            this.currentItem = item
+            //this.currentItem = item
             this.handleClose = handleClose
             let extension = '' as string
             if (this.currentMeta && this.currentMeta.pathName) {
@@ -104,15 +97,14 @@ class FormDialog extends Component<EditTagsProps> {
                     >
                         <form id='3 '>
                             <DialogTitle
-                                id="form-dialog-edit">Editing TAGS : {this.currentItem.getDisplayName()}
+                                id="form-dialog-edit">Editing TAGS : {item.getDisplayName()}
                             </DialogTitle>
                             <DialogContent
                                 style={{ overflow: 'visible' }}
                             >
                                 <AutocompleteTag
                                     meta={this.currentMeta}
-                                    setSaveText={this.setSaveText}
-
+                                    setSaveButtonText={this.setSaveButtonText}
                                 />
 
                                 {extension === ''
@@ -140,7 +132,7 @@ class FormDialog extends Component<EditTagsProps> {
                                     Close
                                 </Button>
                                 <Button color="primary" onClick={this.handleSave.bind(this)} type="submit">
-                                    {this.saveText}
+                                    {this.saveButtonText}
                                 </Button>
                             </DialogActions>
                         </form>

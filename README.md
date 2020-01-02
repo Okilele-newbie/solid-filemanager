@@ -16,8 +16,8 @@ Those modifications are actually of no importance
 **List tags**
 - Top left corner switch to "Tags"
 - 2 lists: Tags on 
-- Local = only yours
-- Central = all tags anybody saved on Central index, including yours
+    - Local = only yours
+    - Central = all tags anybody saved on Central index, including yours
 
 **Status**: This is NOT a working app but a POC (Proof Of Concept)
 - Registering and retrieving tags works but ...
@@ -26,5 +26,5 @@ Those modifications are actually of no importance
 - Central index is on my personal server, high availability is not guaranteed
 - I don't plan to work anymore on this app except if there is blocking issues or new ideas about tags to test
 
-So play around with the solid-filemanager and let us know if this idea worth growing up ...
+So play around with this fork of solid-filemanager, enjoy and let us know if this idea worth growing up ...
   

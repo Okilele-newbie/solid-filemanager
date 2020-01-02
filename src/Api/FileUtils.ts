@@ -70,23 +70,25 @@ export default class FileUtils {
         return res
     }
 
-
     //Interface method for FileClient.readFile
-    static async fileClientReadFileAsString(url: string) {
+    static async fileClientReadFileAsString(url: string, createIfDontExists: boolean) {
         let res: string = ''
-        await FileClient.readFile(url).then(
+        FileClient.readFile(url).then(
             (body: string) => {
                 res = body
             }
             , (err: any) => {
-                console.log(`Error when reading file ${url}, returning blank`)
-                //throw new Error("read error  " + err)
+                if (!createIfDontExists) console.log(`Error when reading file ${url}, returning blank`)
+                else {
+                    this.fileClientCreateFile(url)
+                    res = ''
+                }
             });
         return res as string
     }
 
     //Interface method for FileClient.createFile
-    static async fileClientcreateFile(url: string) {
+    static async fileClientCreateFile(url: string) {
         FileClient.createFile(url)
             .then(
                 () => { return true }

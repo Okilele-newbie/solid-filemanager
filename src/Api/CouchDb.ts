@@ -14,8 +14,10 @@ export interface FoundTags {
 
 export default class CouchDb {
 
-  static couchDbServerUrl = `http://127.0.0.1:5984`
-  static couchDbDatabaseName = `solidfilemanager`
+  static couchDbServerUrl = `http://91.186.9.6:5984`
+  static couchDbDatabaseName = `solid`
+  //static couchDbServerUrl = `http://127.0.0.1:5984`
+  //static couchDbDatabaseName = `solidfilemanager`
   static couchDbBaseUrl = `${CouchDb.couchDbServerUrl}/${CouchDb.couchDbDatabaseName}`
 
   // unused.
@@ -49,24 +51,29 @@ export default class CouchDb {
     return usedTag
   }
 
-    //List of Meta for selected Tags
-    static async getMetaFromTags(selectedTags: MetaTag[]): Promise<Meta[]> {
-      let tagsAsString = this.tagArrayTotring(selectedTags)
-      //   http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/MetasByTags?keys=['tagValue'']
-      const url: string = `${this.couchDbBaseUrl}/_design/DesignDoc/_view/MetasByTags?keys=${tagsAsString}`
-      let json = await this.executeQueryonCouch(url) as string
-      let response = JSON.parse(json)
-      let foundMeta = [] as Meta[]
-      if (response.rows) {
-        response.rows.forEach((row: CouchDbRowKeyValue) => {
-          const meta = row.value as unknown as Meta
-          foundMeta.push(meta)
-        })
-      }
-      return foundMeta
+  //List of Meta for selected Tags
+  static async getMetaFromTags(selectedTags: MetaTag[]): Promise<Meta[]> {
+    let tagsAsString = this.tagArrayTotring(selectedTags)
+    //   http://127.0.0.1:5984/solidfilemanager/_design/DesignDoc/_view/MetasByTags?keys=['tagValue'']
+    const url: string = `${this.couchDbBaseUrl}/_design/DesignDoc/_view/MetasByTags?keys=${tagsAsString}`
+    let json = await this.executeQueryonCouch(url) as string
+    let response = JSON.parse(json)
+    let foundMeta = [] as Meta[]
+    if (response.rows) {
+      response.rows.forEach((row: CouchDbRowKeyValue) => {
+        const meta = row.value as unknown as Meta
+        foundMeta.push(meta)
+      })
+      //get unique
+      foundMeta = foundMeta.filter((foundMeta, index, self) =>
+      index === self.findIndex((t) => (
+        t._id === foundMeta._id
+      ))
+    )
     }
 
-
+    return foundMeta
+  }
 
   //ToDo: callback to handle error (rollback on Local?)
   static updateMeta(meta: Meta) {
