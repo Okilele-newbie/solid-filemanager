@@ -1,9 +1,10 @@
-import SolidFileClientUtils from './FileUtils';
+import FileUtils from './FileUtils';
 import { FolderItem } from './Item'
 
 import lodash from 'lodash'
 import { Item } from './Item';
 import CouchDb from './CouchDb';
+import config from '../config';
 
 const tagDir = '/public'
 const tagFileName = 'Meta.json'
@@ -28,41 +29,40 @@ export interface Meta {
 
 export default class MetaUtils {
 
-    static allLocalMetas = [] as Meta[];
+    static allLocalMeta = [] as Meta[];
     static currentMeta = {} as Meta;
     static currentItem = {} as Item
+    //used in TagList
     static currentLocalUsedTags = [] as MetaTag[]
+    static currentCentralUsedTags = [] as MetaTag[]
 
-    static async getTagIndexFullPath() {
-        const baseUrl = (await SolidFileClientUtils.getWebIdAndHost()).baseUrl
-        return `${baseUrl}${tagDir}/${tagFileName}`
+    static getTagIndexFullPath() {
+        return `${config.getHost()}${tagDir}/${tagFileName}`
     }
 
     //Local storage, read the file and get all metas in it
     static async getAllLocalMetas() {
         let allMetas = [] as Meta[]
-        if (this.allLocalMetas.length !== 0) allMetas = this.allLocalMetas
+        if (this.allLocalMeta.length !== 0) allMetas = this.allLocalMeta
         else {
-            const tagIndexFullPath = await MetaUtils.getTagIndexFullPath()
-            const json = await SolidFileClientUtils.fileClientReadFileAsString(tagIndexFullPath, true)
-            if (json !== '') {
-                allMetas = JSON.parse(json)
-                this.allLocalMetas = allMetas
-            }
+            const baseUrl = (await FileUtils.loadUserIdAndHost()).baseUrl
+            var json: string = await FileUtils.fileClientReadFileAsString(`${baseUrl}${tagDir}/${tagFileName}`)
+            if (json === '') FileUtils.fileClientcreateFile(MetaUtils.getTagIndexFullPath())
+            else allMetas = JSON.parse(json)
+            this.allLocalMeta = allMetas
         }
         return allMetas
     }
-
     //List of Meta for selected tags
-    static async getMetaList(selectedTags: MetaTag[], showLocalOrCentral: boolean): Promise<Meta[]> {
-        if (!showLocalOrCentral)
-            return this.getLocalMetaList(selectedTags)
+    static async getMetaList(selectedTags: MetaTag[], localOrCentral: boolean): Promise<Meta[]> {
+        if (localOrCentral)
+            return this.getSelectedLocalMeta(selectedTags)
         else
-            return this.getCentralMetaList(selectedTags)
+            return this.getSelectedCentralMeta(selectedTags)
     }
 
     //list of loval meta from selected tags
-    static async getLocalMetaList(selectedTags: MetaTag[]): Promise<Meta[]> {
+    static async getSelectedLocalMeta(selectedTags: MetaTag[]): Promise<Meta[]> {
         const allLocalMetas = await this.getAllLocalMetas() as unknown as Meta[]
         let filteredMetas = [] as Meta[]
         //Create a list of copies of metas filtered by view selection and only wearing selected tags
@@ -106,14 +106,14 @@ export default class MetaUtils {
         });
     }
 
-    static async getCentralMetaList(selectedTags: MetaTag[]): Promise<Meta[]> {
+    static async getSelectedCentralMeta(selectedTags: MetaTag[]): Promise<Meta[]> {
         let foundMetas = await CouchDb.getMetaFromTags(selectedTags) as Meta[]
         //Set color (using (property "published") to tags if Meta + tag are also on local
         const allLocalMetas = await this.getAllLocalMetas() as unknown as Meta[]
         allLocalMetas.forEach(localMeta => {
             foundMetas.forEach(centralMeta => {
-                if (localMeta.hostName === centralMeta.hostName
-                    && localMeta.pathName === centralMeta.pathName) {
+                //if (localMeta.hostName === centralMeta.hostName
+                //    && localMeta.pathName === centralMeta.pathName) {
                     centralMeta.tags.forEach(centralTag => {
                         localMeta.tags.forEach(localTag => {
                             if (localTag.tagType === centralTag.tagType
@@ -122,7 +122,7 @@ export default class MetaUtils {
                             }
                         })
                     })
-                }
+                //}
             })
         })
         return foundMetas
@@ -162,7 +162,7 @@ export default class MetaUtils {
         let allLocalMetas: Meta[] = await this.getAllLocalMetas() as unknown as Meta[]
         allLocalMetas = allLocalMetas.filter(el => !(el.hostName === meta.hostName && el.pathName === meta.pathName));
         allLocalMetas.push(meta)
-        SolidFileClientUtils.fileClientupdateFile(
+        FileUtils.fileClientupdateFile(
             await MetaUtils.getTagIndexFullPath(),
             JSON.stringify(allLocalMetas)
         )
@@ -175,63 +175,70 @@ export default class MetaUtils {
 
         //FINALLY
         this.currentMeta = meta
-        this.allLocalMetas = allLocalMetas
-        //update currentLocalUsedTags if already loaded
-        if (this.currentLocalUsedTags !== undefined) {
-            MetaUtils.getLocalUsedTags()
-                .then((foundTags: MetaTag[]) => {
-                    this.currentLocalUsedTags = foundTags
-                })
-        }
+        this.allLocalMeta = allLocalMetas
+
+        this.refreshCurrentUsedTags()
+    }
+
+    // ========================================================= TAGS
+
+    static async getUsedTags(localOrCentral: number) {
+        return (
+            localOrCentral === 0
+                ? this.getLocalUsedTags()
+                : this.getCentralUsedTags()
+        )
     }
 
     static async getLocalUsedTags() {
         let usedTags = [] as MetaTag[]
-        //if (this.currentLocalUsedTags.length !== 0) usedTags = this.currentLocalUsedTags
-        //else {
-        let allMetas: Meta[] = await this.getAllLocalMetas() as unknown as Meta[]
-        //get list of tags in meta
-        let foundTags = [] as MetaTag[]
-        if (allMetas) {
-            allMetas.forEach(meta => {
-                if (meta.tags) {
-                    meta.tags.forEach(tag => {
-                        foundTags.push(tag)
-                    })
-                }
-            })
+        if (this.currentLocalUsedTags.length !== 0) usedTags = this.currentLocalUsedTags
+        else {
+            let allMetas: Meta[] = await this.getAllLocalMetas()
+            //get list of tags in meta
+            let foundTags = [] as MetaTag[]
+            if (allMetas) {
+                allMetas.forEach(meta => {
+                    if (meta.tags) {
+                        meta.tags.forEach(tag => {
+                            foundTags.push(tag)
+                        })
+                    }
+                })
+            }
+            usedTags = lodash.uniqWith(foundTags, function (first, second) {
+                return first.tagType === second.tagType && first.value === second.value
+            });
+            usedTags = lodash.sortBy(usedTags, ['tagType', 'value']);
+            this.currentLocalUsedTags = usedTags
         }
-        usedTags = lodash.uniqWith(foundTags, function (first, second) {
-            return first.tagType === second.tagType && first.value === second.value
-        });
-        usedTags = lodash.sortBy(usedTags, ['tagType', 'value']);
-        //}
         return usedTags
     }
 
     //Get tags on Central and mark them "also on local?"
     static async getCentralUsedTags(): Promise<Array<any>> {
-        return new Promise((resolve, reject) => {
-            CouchDb.getItemsByViewGroupedTags()
-                .then(
-                    (centralTags: MetaTag[]) => {
-                        //meta.published property fakely used as "central tag not published on this local?"
-                        centralTags.forEach(centralTag => { centralTag.published = false })
-                        MetaUtils.getLocalUsedTags()
-                            .then((localTags: MetaTag[]) => {
-                                //refresh cache as we have the value
-                                //this.currentLocalUsedTags = localTags
-                                localTags.forEach(localTag => {
-                                    if (localTag.published === true) {
-                                        this.markCentralFromLocal(centralTags, localTag)
-                                    }
+        if (this.currentCentralUsedTags.length !== 0) return this.currentCentralUsedTags
+        else {
+            return new Promise((resolve, reject) => {
+                CouchDb.getItemsByViewGroupedTags()
+                    .then(
+                        (centralTags: MetaTag[]) => {
+                            //meta.published property fakely used as "central tag not published on this local?"
+                            centralTags.forEach(centralTag => { centralTag.published = false })
+                            MetaUtils.getLocalUsedTags()
+                                .then((localTags: MetaTag[]) => {
+                                    localTags.forEach(localTag => {
+                                        if (localTag.published === true) {
+                                            this.markCentralFromLocal(centralTags, localTag)
+                                        }
+                                    })
+                                    this.currentCentralUsedTags = centralTags
+                                    resolve(centralTags)
                                 })
-                                resolve(centralTags)
-                            })
-                    }
-                )
-        })
-
+                        }
+                    )
+            })
+        }
     }
 
     //getCentralUsedTags() helper: marks published=true to central tags found in local tags
@@ -244,6 +251,12 @@ export default class MetaUtils {
         publishedTags.forEach((tag: MetaTag) => tag.published = true)
     }
 
+    static refreshCurrentUsedTags() {
+        this.currentLocalUsedTags = []
+        this.currentCentralUsedTags = []
+        //No need to load localUsedTags, will be done when loading centralUsedTags
+        this.getCentralUsedTags()
+    }
 }
 
 

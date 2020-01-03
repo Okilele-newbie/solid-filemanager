@@ -16,15 +16,18 @@ Those modifications are actually of no importance
 **List tags**
 - Top left corner switch to "Tags"
 - 2 lists: Tags on 
-    - Local = only yours
-    - Central = all tags anybody saved on Central index, including yours
+    - Local = only yours. Black are on local only, purple are also on central index
+    - Central = all tags anybody saved on Central index, including yours. 
+      - Purple are tags on central you use (and maybe created), 
+      - Black tags are used by other people but not you. And so selecting those tags will show their files.
 
-**Status**: This is NOT a working app but a POC (Proof Of Concept)
+**Status**: This is NOT a working app but a proof of concept
 - Registering and retrieving tags works but ...
-- Synchronisation between Pods and Local/Central indexes is not done: If you delete a file or folder please previously manually delete tags
-- A lot of features are not implemented (refresh list of tags when editing tags of a file, switch from a view to another etc...)
+- Synchronisation between Pods and Local/Central indexes is not always done: If you delete a file or folder please previously manually delete tags
+- Some features are not implemented left lists (tag/treeview) is not always synchronized with right list (files and folders).
+- The application is not bug proff guaranteed
 - Central index is on my personal server, high availability is not guaranteed
 - I don't plan to work anymore on this app except if there is blocking issues or new ideas about tags to test
 
-So play around with this fork of solid-filemanager, enjoy and let us know if this idea worth growing up ...
+So play around with this fork of solid-filemanager, enjoy and let us know if the central tag index idea worth growing up ...
   

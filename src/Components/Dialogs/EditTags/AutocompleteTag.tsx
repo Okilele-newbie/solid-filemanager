@@ -41,8 +41,7 @@ class MultiValueLabel extends React.Component<MultiValueLabelProps> {
 
 interface PopupProps {
     [x: string]: any,
-    meta: Meta,
-    setSaveButtonText(saveTextLevel: number): void;
+    meta: Meta
 }
 
 interface PopupState {
@@ -98,26 +97,7 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
             }
         }
         this.props.meta.tags = items
-        this.setSaveButtonText()
         this.forceUpdate()
-    }
-
-    //Called from here when modifying the list of tags and send to parent
-    setSaveButtonText() {
-        let saveTextLevel = 0
-        if (this.props.meta.tags) {
-            this.props.meta.tags.forEach((tag) => {
-                if (saveTextLevel === 0) {
-                    if (tag.published) saveTextLevel = 3
-                    if (!tag.published) saveTextLevel = 1
-                }
-                if ((saveTextLevel === 1 && tag.published)
-                    || (saveTextLevel === 3 && !tag.published)) {
-                    saveTextLevel = 2
-                }
-            })
-        }
-        this.props.setSaveButtonText(saveTextLevel)
     }
 
     //Change source of suggestions for tags
@@ -136,7 +116,6 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 CallJsonP((suggests: any[]) => {
                     //suggests[1] creates a new Io
                     suggests[1].forEach((item: string) => {
-                        //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': item, published: false, 'label': item }
                         const suggestion = new Suggestion(item)
                         retVal.push(suggestion)
                     })
@@ -149,7 +128,6 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 MetaUtils.getLocalUsedTags()
                     .then((foundTags: MetaTag[]) => {
                         foundTags.forEach(tag => {
-                            //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
                             const suggestion = new Suggestion(tag.value)
                             retVal.push(suggestion);
                         })
@@ -161,7 +139,6 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                 MetaUtils.getCentralUsedTags()
                     .then((foundTags: MetaTag[]) => {
                         foundTags.forEach(tag => {
-                            //const suggestion: Suggestion = { 'tagType': 'FreeTag', 'value': tag.value, published: false, 'label': tag.value }
                             const suggestion = new Suggestion(tag.value)
                             retVal.push(suggestion);
                         })
@@ -169,8 +146,6 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
                     })
             }
         }
-        //Also trigered when clikcing on item to make it published/not
-        this.setSaveButtonText()
     }
 
     //set all to published
@@ -178,7 +153,6 @@ export default class AutocompleteTag extends React.Component<PopupProps, PopupSt
         this.props.meta.tags.forEach((tag) => {
             tag.published = event.target.checked
         })
-        this.setSaveButtonText()
         this.forceUpdate()
     }
 

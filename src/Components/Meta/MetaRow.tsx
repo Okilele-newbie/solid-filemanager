@@ -10,49 +10,64 @@ import ListItemText from '@material-ui/core/ListItemText';
 import { AppState } from '../../Reducers/reducer';
 import { FileItem, FolderItem, Item } from '../../Api/Item';
 import { Meta, onServerColor } from '../../Api/MetaUtils';
+import FileUtils from '../../Api/FileUtils';
 
 class MetaRow extends Component<MetaProps> {
 
+    userId = FileUtils.userIdAndHost.userId
+
     render() {
         const { isSelected, meta, handleClickOnName, handleDoubleClick, handleContextMenu } = this.props;
-        /*
-        let tagList = '' as string
-        let itemColor = { color: 'black' }
-        meta.tags.forEach(tag => {
-            console.log('1')
-            tag.published && itemColor.color === 'black'
-                ? itemColor = { color: onServerColor }
-                : itemColor = { color: 'black' }
-
-            if (tagList !== '') tagList += ` - `
-            tagList += <span style={itemColor}>`${tag.tagType}: ${tag.value}`</span>
-        })
-
-        tagList = ` (${tagList})`
-        */
         let prevChars = ''
         return (
-            <div className="File" data-selected={isSelected}>
-                <ListItem style={{ padding: '0 16px 0px 16px' }}>
-                    <ListItemText
-                        onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu} >
-                        {meta.hostName} - {meta.pathName}
-                        {meta.tags.map(tag => {
-                            const itemColor = tag.published ? { color: onServerColor } : { color: 'black' }
-                            prevChars = prevChars === '' ? ' (' : ' - '
-                            return (
-                                <span style={itemColor}>
-                                    {prevChars}{tag.tagType}: {tag.value}
-                                </span>
+            meta.hostName === this.userId ? (
+                < div className="File" data-selected={isSelected} >
+                    <ListItem style={{ padding: '0 16px 0px 16px' }}>
+                        <ListItemText
+                            onClick={handleClickOnName} onDoubleClick={handleDoubleClick} onContextMenu={handleContextMenu}>
+                            <span>
+                                {meta.hostName} - {meta.pathName}
+                            </span>
+                            {meta.tags.map(tag => {
+                                const itemColor = tag.published ? { color: onServerColor } : { color: 'black' }
+                                prevChars = prevChars === '' ? ' (' : ' - '
+                                return (
+                                    <span style={itemColor}>
+                                        {prevChars}{tag.tagType}: {tag.value}
+                                    </span>
+                                )
+                            })}
                             )
-                        })
-                        }
-                        )
-                    </ListItemText>
-                </ListItem>
-            </div>
-        );
+                        </ListItemText>
+                    </ListItem>
+                </div >
+            ) : (
+                    <div className="File" data-selected={isSelected}>
+                        <ListItem style={{ padding: '0 16px 0px 16px' }}>
+                            <ListItemText
+                                onClick={handleClickOnName} onDoubleClick={handleDoubleClick} >
+                                {meta.hostName} - {meta.pathName}
+                                {meta.tags.map(tag => {
+                                    const itemColor = tag.published ? { color: onServerColor } : { color: 'black' }
+                                    prevChars = prevChars === '' ? ' (' : ' - '
+                                    return (
+                                        <span style={itemColor}>
+                                            {prevChars}{tag.tagType}: {tag.value}
+                                        </span>
+                                    )
+                                })}
+                                )
+                        </ListItemText>
+                        </ListItem>
+                    </div>
+
+                )
+
+
+
+        )
     }
+
 }
 
 

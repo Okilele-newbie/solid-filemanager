@@ -19,9 +19,9 @@ class MetaList extends Component<MetaListProps> {
         });
 
         return <div className="MetaList">
-            { isLoading ? 
-                <Loader /> : 
-                itemComponents.length ? itemComponents : <FileListEmptyMessage />
+            { isLoading 
+                ? <Loader /> 
+                : itemComponents.length ? itemComponents : <FileListEmptyMessage />
             }
         </div>
     }

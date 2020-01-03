@@ -10,79 +10,55 @@ import Switch from '@material-ui/core/Switch';
 
 import { getMetaList, MyDispatch } from '../../Actions/Actions';
 import MetaUtils, { MetaTag, onServerColor } from '../../Api/MetaUtils'
-import lodash from 'lodash'
-
-/*
-const MyList = styled(List)({
-    minWidth: 'max-content'
-});
-
-const MyListItem = styled(ListItem)({
-    padding: '0 0 0 10px'
-});
-
-const MyListItemText = styled(ListItemText)({
-    fontSize: '0.9em',
-    padding: '0 0 0 0',
-});
-
-const MyCheckbox = styled(Checkbox)({
-    padding: '0 0 0 0'
-});
-*/
 
 export class TagList extends Component<TagListProps> {
 
-    usedTags = [] as MetaTag[]
-    selectedTags = [] as MetaTag[]
+    usedTags = [[]] as MetaTag[][]
+    selectedTags = [[]] as MetaTag[][]
 
+    localOrCentral = true as boolean
+    LC = 0 as number
+
+    //showLocal(true)OrCentral(false)
     state = {
-        showLocalOrCentral: true,
+        localOrCentral: true,
         loading: true
     }
 
     componentDidMount() {
-        this.setState({showLocalOrCentral: false})
+        this.setState({ localOrCentral: true })
+        this.selectedTags[0] = []
+        this.selectedTags[1] = []
         this.refreshView();
     };
 
     refreshView() {
-        this.usedTags = [] as MetaTag[]
-        if (this.state.showLocalOrCentral) {
-            MetaUtils.getLocalUsedTags()
-                .then(foundTags => {
-                    this.usedTags.push(...foundTags as MetaTag[]);
-                    this.setState({ loading: false })
-                })
-        }
+        MetaUtils.getUsedTags(this.LC)
+            .then(foundTags => {
+                this.usedTags[this.LC] = foundTags;
+                this.setState({ loading: false })
+            })
+        this.props.handleSubmit(this.selectedTags[this.LC], this.localOrCentral);
 
-        if (!this.state.showLocalOrCentral) {
-            MetaUtils.getCentralUsedTags()
-                .then(foundTags => {
-                    if (foundTags !== undefined) {
-                        this.usedTags.push(...foundTags as MetaTag[]);
-                        this.setState({ loading: false })
-                    }
-                })
-        }
     }
 
-    //Select a tag to load related Metas. Target is MetaUtils.getLocalMetaList
+    //Select a tag to load related Metas. Target is MetaUtils.getMetaList
     handleClick(metaTag: MetaTag) {
         //event.preventDefault();
-        const i: number = this.selectedTags.indexOf(metaTag)
+        const i: number = this.selectedTags[this.LC].indexOf(metaTag)
         i !== -1
-            ? this.selectedTags.splice(i, 1)
-            : this.selectedTags.push(metaTag)
-        this.props.handleSubmit(this.selectedTags, this.state.showLocalOrCentral);
+            ? this.selectedTags[this.LC].splice(i, 1)
+            : this.selectedTags[this.LC].push(metaTag)
+        this.props.handleSubmit(this.selectedTags[this.LC], this.localOrCentral);
         this.forceUpdate() //CheckBox update
     }
-    
+
 
     //local/central
     onChange() {
-        this.selectedTags = []
-        this.setState({ showLocalOrCentral: !this.state.showLocalOrCentral });
+        this.localOrCentral = !this.localOrCentral
+        this.setState({ localOrCentral: this.localOrCentral });
+        this.LC = this.localOrCentral ? 0 : 1
         this.setState({ loading: true })
         this.refreshView()
     }
@@ -93,7 +69,7 @@ export class TagList extends Component<TagListProps> {
                 <div>
                     Local
                     <Switch
-                        checked={this.state.showLocalOrCentral}
+                        checked={!this.localOrCentral}
                         onChange={() => { this.onChange() }}
                         color="default"
                     />
@@ -106,25 +82,24 @@ export class TagList extends Component<TagListProps> {
 
     PrintList = () => {
         if (!this.state.loading) {
-            this.usedTags = lodash.sortBy(this.usedTags, ['tagType', 'value']);
             return (
-                < List style={{minWidth: 'max-content'}} className='leftPane' >
-                    {this.usedTags.map(tag => {
+                < List style={{ minWidth: 'max-content' }} className='leftPane' >
+                    {this.usedTags[this.LC].map(tag => {
                         const itemColor = {
                             color: tag.published ? onServerColor : 'black'
                         };
                         return (
-                            <ListItem style={{ padding: '0 0 0 10px'}}
+                            <ListItem style={{ padding: '0 0 0 10px' }}
                                 key={tag.value}
                                 role={undefined}
                                 dense button
                             >
-                                <Checkbox style={{ padding: '0 0 0 0'}}
+                                <Checkbox style={{ padding: '0 0 0 0' }}
                                     color="primary"
                                     onChange={e => this.handleClick(tag)}
-                                    checked={this.selectedTags.find(elt => tag === elt) !== undefined}
+                                    checked={this.selectedTags[this.LC].find(elt => tag === elt) !== undefined}
                                 />
-                                <ListItemText style={{ padding: '0 0 0 0'}}
+                                <ListItemText style={{ padding: '0 0 0 0' }}
                                     id={tag.value}
                                     onClick={e => this.handleClick(tag)}>
                                     <span style={itemColor}>{`${tag.tagType}: ${tag.value}`}</span>
@@ -149,7 +124,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleSubmit(selectedTags: MetaTag[], showLocalOrCentral: boolean): void;
+    handleSubmit(selectedTags: MetaTag[], localOrCentral: boolean): void;
 }
 
 interface TagListProps extends TagListOwnProps, StateProps, DispatchProps { }
@@ -158,8 +133,8 @@ const mapStateToProps = () => ({});
 
 const mapDispatchToProps = (dispatch: MyDispatch, ownProps: TagListOwnProps): DispatchProps => {
     return {
-        handleSubmit: (selectedTags: MetaTag[], showLocalOrCentral: boolean) => {
-            dispatch(getMetaList(selectedTags, showLocalOrCentral));
+        handleSubmit: (selectedTags: MetaTag[], localOrCentral: boolean) => {
+            dispatch(getMetaList(selectedTags, localOrCentral));
         }
     };
 };

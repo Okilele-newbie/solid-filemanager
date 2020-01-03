@@ -16,28 +16,10 @@ import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 
 class FormDialog extends Component<EditTagsProps> {
-
-    constructor(props: any) {
-        super(props)
-        this.setSaveButtonText = this.setSaveButtonText.bind(this)
-    }
-
-    //sent to TreeViewItem for expand/collapse handled here
-    setSaveButtonText(saveTextLevel: number) {
-        if (saveTextLevel === 1) this.saveButtonText = 'Save all to local'
-        if (saveTextLevel === 2) this.saveButtonText = 'Save all to local and some to central'
-        if (saveTextLevel === 3) this.saveButtonText = 'Save all to local and central'
-        this.setState({ saveText: this.saveButtonText });
-    };
-
     //Init mandatory as render sn invoked on left click on item, even before Edit tag is choosed
     currentMeta = {} as Meta;
     saveButtonText = ''
-
-    componentDidUpdate() {
-
-    }
-
+    
     //target function is MetaUtils.updateMeta
     handleSave(event: DialogButtonClickEvent) {
         event.preventDefault();
@@ -51,7 +33,7 @@ class FormDialog extends Component<EditTagsProps> {
         this.currentMeta.tags = cleanedTags
         this.props.handleSubmit(event, this.currentMeta);
         this.setState({ item: null })
-        MetaUtils.allLocalMetas = []
+        MetaUtils.allLocalMeta = []
     }
 
     handleClose = {}
@@ -104,7 +86,6 @@ class FormDialog extends Component<EditTagsProps> {
                             >
                                 <AutocompleteTag
                                     meta={this.currentMeta}
-                                    setSaveButtonText={this.setSaveButtonText}
                                 />
 
                                 {extension === ''
@@ -132,7 +113,7 @@ class FormDialog extends Component<EditTagsProps> {
                                     Close
                                 </Button>
                                 <Button color="primary" onClick={this.handleSave.bind(this)} type="submit">
-                                    {this.saveButtonText}
+                                    Save
                                 </Button>
                             </DialogActions>
                         </form>

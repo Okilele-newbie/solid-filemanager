@@ -141,9 +141,9 @@ export const updateMeta = (meta: Meta): MyThunk => (dispatch, getState) => {
 /**
  * Request API to display Meta list for the selected tag
  */
-export const getMetaList = (selectedTags: MetaTag[], showLocalOrCentral: boolean): MyThunk => (dispatch, getState) => {
+export const getMetaList = (selectedTags: MetaTag[], localOrCentral: boolean): MyThunk => (dispatch, getState) => {
         dispatch(displayLoading());
-        APIHandler.getMetaList(selectedTags, showLocalOrCentral)
+        APIHandler.getMetaList(selectedTags, localOrCentral)
             .then(items => dispatch(setMetas(items)))
             .catch(r => dispatch(setErrorMessage(String(r))))
             .finally(() => dispatch(stopLoading())); 

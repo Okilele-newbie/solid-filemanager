@@ -5,7 +5,7 @@ import ListSubheader from "@material-ui/core/ListSubheader";
 import Collapse from "@material-ui/core/Collapse";
 //import { styled } from '@material-ui/styles';
 
-import SolidFileClientUtils, { IFolder } from '../../Api/FileUtils';
+import FileUtils, { IFolder } from '../../Api/FileUtils';
 import TreeViewItem from "./TreeViewItem";
 import Loader from '../Loader/Loader'; 
 
@@ -37,10 +37,10 @@ export default class TreeView extends Component {
 
     async initFolders() {
         
-        const baseUrl = (await SolidFileClientUtils.getWebIdAndHost()).baseUrl
+        const baseUrl = (await FileUtils.loadUserIdAndHost()).baseUrl
         
         if (baseUrl !== null) {
-            this.folder = await SolidFileClientUtils.fileClientReadFolder(baseUrl)
+            this.folder = await FileUtils.fileClientReadFolder(baseUrl)
 
             //get folders in the root
             await this.updateFolder(this.folder)
@@ -58,14 +58,14 @@ export default class TreeView extends Component {
     async updateFolder(item: IFolder) {
         for (var i = 0; i < item.folders.length; i++) {
             if (item.folders[i].known !== true) {
-                item.folders[i] = await SolidFileClientUtils.fileClientReadFolder(item.folders[i].url)
+                item.folders[i] = await FileUtils.fileClientReadFolder(item.folders[i].url)
                 item.folders[i].known = true
             }
             for (var j = 0; j < item.folders[i].folders.length; j++) {
                 try {
                     if (item.folders[i].folders[j].known !== true) {
                         item.folders[i].folders[j] =
-                            await SolidFileClientUtils.fileClientReadFolder(item.folders[i].folders[j].url)
+                            await FileUtils.fileClientReadFolder(item.folders[i].folders[j].url)
                             item.folders[i].folders[j].known = true
                     }
                 } catch (err) {

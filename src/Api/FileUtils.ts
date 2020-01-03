@@ -39,23 +39,27 @@ export default class FileUtils {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    static webIdAndHost = {webId: '', baseUrl: ''}
-    static async getWebIdAndHost() {
-        if (this.webIdAndHost.webId === '') {
+    static userIdAndHost = {userId: '', baseUrl: ''}
+    static async loadUserIdAndHost() {
+        if (this.userIdAndHost.userId === '') {
             let baseUrl = config.getHost()
             while (baseUrl === null) {
                 await this.sleep(1000)
                 baseUrl = config.getHost()
             }
             const session = await solidAuth.currentSession()
-            let webId = session ? session.webId : ''
-            this.webIdAndHost = { webId: webId, baseUrl: baseUrl }
+            let userId = ''
+            if (session) {
+                const url = new URL(session.webId)
+                userId = url.hostname
+            }
+            this.userIdAndHost = { userId: userId, baseUrl: baseUrl }
         }
-        return this.webIdAndHost
+        return this.userIdAndHost
     }
 
     static async fileClientReadFolder(fileName: string) {
-        const infos = await this.getWebIdAndHost()
+        const infos = await this.loadUserIdAndHost()
         let res = {} as IFolder;
         await FileClient.readFolder(fileName).then((content: IFolder) => {
             content.name = decodeURI(content.name)
@@ -65,30 +69,27 @@ export default class FileUtils {
             })
             res = content
         }, (err: any) => {
-            alert(`User ${infos.webId} is not able to read folder ${fileName} on Pod ${infos.baseUrl}`)
+            alert(`User ${infos.userId} is not able to read folder ${fileName} on Pod ${infos.baseUrl}`)
         });
         return res
     }
 
     //Interface method for FileClient.readFile
-    static async fileClientReadFileAsString(url: string, createIfDontExists: boolean) {
+    static async fileClientReadFileAsString(url: string) {
         let res: string = ''
-        FileClient.readFile(url).then(
+        await FileClient.readFile(url).then(
             (body: string) => {
                 res = body
             }
             , (err: any) => {
-                if (!createIfDontExists) console.log(`Error when reading file ${url}, returning blank`)
-                else {
-                    this.fileClientCreateFile(url)
-                    res = ''
-                }
+                console.log(`Error when reading file ${url}, returning blank`)
+                //throw new Error("read error  " + err)
             });
         return res as string
     }
 
     //Interface method for FileClient.createFile
-    static async fileClientCreateFile(url: string) {
+    static async fileClientcreateFile(url: string) {
         FileClient.createFile(url)
             .then(
                 () => { return true }
