@@ -26,6 +26,17 @@ Those modifications are actually of no importance
       - Right click for context menu. Only works for your files:
         - Edit tags works
         - All other functions may NOT work
+        
+**Technical information**
+- Pages include content from Solid using https and also:
+  - data from CouchDb and this is active mixed content as the CouchDb server is not https.
+  - cross-origin content as  the CouchDb server has its own IP.    
+Browsers don't like !  
+In order to fix this:
+  - Chrome/Opera: Just allow blocked content if prompted.
+  - Firefox: Allowing mixed content is easy in about:config parameters. It should be the same for Cors with the content.cors.disable parameter but this doesn't work ...
+  - IE/Edge : Does not work, I did not investigate  
+So, at least for those tests, please use Chrome or Opera (same engine).
 
 **Status**: This is NOT a working app but a proof of concept
 - Registering and retrieving tags works but ...
